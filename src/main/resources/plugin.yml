@@ -1,0 +1,182 @@
+name: Homestead
+main: tfagaming.projects.minecraft.homestead.Homestead
+version: 4.0.2
+description: 'The Ultimate and Premium-Free Grief Prevention Plugin.'
+author: TFAGaming
+api-version: 1.21
+softdepend: [Vault]
+commands:
+  claim:
+    description: 'Claim a chunk'
+    usage: '/<command> <name>'
+    permission: homestead.commands.claim
+    default: true
+  unclaim:
+    description: 'Unclaim a chunk'
+    usage: '/<command>'
+    permission: homestead.commands.unclaim
+    default: true
+  region:
+    description: 'The main command to manage regions'
+    usage: '/<command> [subcommand] <args>'
+    permission: homestead.commands.region
+    aliases:
+      - rg
+      - hs
+      - homestead
+    default: true
+  homesteadadmin:
+    description: 'The main command for administrators to manage the plugin'
+    usage: '/<command>'
+    permission: homestead.commands.homesteadadmin
+    aliases:
+      - hsadmin
+    default: op
+permissions:
+  homestead.region.create:
+    default: true
+  homestead.region.delete:
+    default: true
+  homestead.region.players.trust:
+    default: true
+  homestead.region.players.untrust:
+    default: true
+  homestead.region.players.ban:
+    default: true
+  homestead.region.players.unban:
+    default: true
+  homestead.region.flags.global:
+    default: true
+  homestead.region.flags.world:
+    default: true
+  homestead.region.flags.members:
+    default: true
+  homestead.region.subareas.create:
+    default: true
+  homestead.region.subareas.delete:
+    default: true
+  homestead.region.subareas.rename:
+    default: true
+  homestead.region.subareas.flags:
+    default: true
+  homestead.region.bank:
+    default: true
+  homestead.region.dynamicmaps.icon:
+    default: true
+  homestead.region.dynamicmaps.color:
+    default: true
+  homestead.region.*:
+    default: true
+    children:
+      homestead.region.create: true
+      homestead.region.delete: true
+      homestead.region.players.trust: true
+      homestead.region.players.untrust: true
+      homestead.region.players.ban: true
+      homestead.region.players.unban: true
+      homestead.region.flags.global: true
+      homestead.region.flags.world: true
+      homestead.region.flags.members: true
+      homestead.region.subareas.create: true
+      homestead.region.subareas.delete: true
+      homestead.region.subareas.rename: true
+      homestead.region.subareas.flags: true
+      homestead.region.bank: true
+      homestead.region.dynamicmaps.icon: true
+      homestead.region.dynamicmaps.color: true
+  homestead.commands.region.accept:
+    default: true
+  homestead.commands.region.banlist:
+    default: true
+  homestead.commands.region.ban:
+    default: true
+  homestead.commands.region.claimlist:
+    default: true
+  homestead.commands.region.create:
+    default: true
+  homestead.commands.region.delete:
+    default: true
+  homestead.commands.region.deny:
+    default: true
+  homestead.commands.region.deposit:
+    default: true
+  homestead.commands.region.flags:
+    default: true
+  homestead.commands.region.help:
+    default: true
+  homestead.commands.region.home:
+    default: true
+  homestead.commands.region.logs:
+    default: true
+  homestead.commands.region.members:
+    default: true
+  homestead.commands.region.menu:
+    default: true
+  homestead.commands.region.player:
+    default: true
+  homestead.commands.region.borders:
+    default: true
+  homestead.commands.region.info:
+    default: true
+  homestead.commands.region.rename:
+    default: true
+  homestead.commands.region.set:
+    default: true
+  homestead.commands.region.subareas:
+    default: true
+  homestead.commands.region.trust:
+    default: true
+  homestead.commands.region.unban:
+    default: true
+  homestead.commands.region.untrust:
+    default: true
+  homestead.commands.region.visit:
+    default: true
+  homestead.commands.region.withdraw:
+    default: true
+  homestead.commands.region.*:
+    default: true
+    children:
+      homestead.commands.region.accept: true
+      homestead.commands.region.banlist: true
+      homestead.commands.region.ban: true
+      homestead.commands.region.claimlist: true
+      homestead.commands.region.create: true
+      homestead.commands.region.delete: true
+      homestead.commands.region.deny: true
+      homestead.commands.region.deposit: true
+      homestead.commands.region.flags: true
+      homestead.commands.region.help: true
+      homestead.commands.region.home: true
+      homestead.commands.region.logs: true
+      homestead.commands.region.members: true
+      homestead.commands.region.menu: true
+      homestead.commands.region.player: true
+      homestead.commands.region.borders: true
+      homestead.commands.region.info: true
+      homestead.commands.region.rename: true
+      homestead.commands.region.set: true
+      homestead.commands.region.subareas: true
+      homestead.commands.region.trust: true
+      homestead.commands.region.unban: true
+      homestead.commands.region.untrust: true
+      homestead.commands.region.visit: true
+      homestead.commands.region.withdraw: true
+  homestead.commands.homesteadadmin.importdata:
+    default: op
+  homestead.commands.homesteadadmin.migratedata:
+    default: op
+  homestead.commands.homesteadadmin.plugin:
+    default: op
+  homestead.commands.homesteadadmin.reload:
+    default: op
+  homestead.commands.homesteadadmin.updates:
+    default: op
+  homestead.commands.homesteadadmin.*:
+    default: op
+    children:
+      homestead.commands.homesteadadmin.importdata: true
+      homestead.commands.homesteadadmin.migratedata: true
+      homestead.commands.homesteadadmin.plugin: true
+      homestead.commands.homesteadadmin.reload: true
+      homestead.commands.homesteadadmin.updates: true

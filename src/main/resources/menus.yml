@@ -1,0 +1,566 @@
+titles:
+  0: "Regions"
+  1: "Region: &2{region}"
+  2: "Player Flags (Global)"
+  3: "World Flags"
+  4: "Manage Players"
+  5: "Trusted Players"
+  6: "Player Flags (&3{playername}&r)"
+  7: "Region Control (&3{playername}&r)"
+  8: "Region: &2{region}"
+  9: "Banned Players"
+  10: "Invited Players"
+  11: "Chunk List"
+  12: "Miscellaneous Settings"
+  13: "Logs & Messages"
+  14: "Sub-Areas"
+  15: "Sub-Area: &2{subarea}"
+  16: "Sub-Area Flags"
+  17: "Region Rating: &2{region}"
+  18: "Top Regions by Bank Balance"
+  19: "Top Regions by Chunks"
+  20: "Top Regions by Members"
+  21: "Top Regions by Creation Date"
+  22: "Top Regions by Player Rating"
+
+buttons:
+  0:
+    name: "&cBack"
+    lore:
+      - "&7Return to the previous menu."
+    type: RED_STAINED_GLASS_PANE
+  1:
+    name: "&9Previous"
+    lore:
+      - "&7Go to the previous page."
+    type: ARROW
+  2:
+    name: "&9Next"
+    lore:
+      - "&7Go to the next page."
+    type: ARROW
+  3:
+    name: " "
+    type: GRAY_STAINED_GLASS_PANE
+  4:
+    name: "&2{region} &7(&2{region-displayname}&7)"
+    lore:
+      - "&7• Owner: &3{region-owner}"
+      - "&7• Bank: &c{region-bank}"
+      - "&7• Created At: &6{region-createdat}"
+      - ""
+      - "&8➥ Shift + Left-click to set as target."
+      - "&8➥ Shift + Right-click to show detailed information."
+      - "&8➥ Left-click to configure."
+      - "&8➥ Right-click to teleport to spawn."
+    type: PLAYERHEAD-e19997593f2c592b9fbd4f15ead1673b76f519d7ab3efa15edd19448d1a20bfc
+  5:
+    name: "&2{region} &7(&2{region-displayname}&7)"
+    lore:
+      - "&7You set this region as targeted region. Any command"
+      - "&7that manages a region (&e/claim&7, &e/rg trust&7) will be"
+      - "&7executed to this region."
+      - ""
+      - "&7• Owner: &3{region-owner}"
+      - "&7• Bank: &c{region-bank}"
+      - "&7• Created At: &6{region-createdat}"
+      - ""
+      - "&8➥ Shift + Left-click to set as target."
+      - "&8➥ Shift + Right-click to show detailed information."
+      - "&8➥ Left-click to configure."
+      - "&8➥ Right-click to teleport to spawn."
+    type: PLAYERHEAD-a79a5c95ee17abfef45c8dc224189964944d560f19a44f19f8a46aef3fee4756
+  6:
+    name: "&9Manage Players"
+    lore:
+      - "&7Manage players for this region; Ban, unban,"
+      - "&7trust, untrust, invite..."
+      - ""
+      - "&7• Members count: &6{region-members}"
+      - ""
+      - "&8➥ Left-click to manage players."
+    type: PLAYERHEAD-75ad626181111e55ebfc906a8e7040c66b8efe94f7c07448d5710012d68436c
+  7:
+    name: "&9Chunk List"
+    lore:
+      - "&7View the list of claimed chunks."
+      - ""
+      - "&7• Chunks count: &6{region-chunks}"
+      - ""
+      - "&8➥ Left-click to view chunks."
+    type: PLAYERHEAD-61b635bc92dd20011d6e7d01257e6ea737b49fb7de941d3bbd1877104fc5eb1e
+  8:
+    name: "&9Manage Flags"
+    lore:
+      - "&7Set flags for global players and the environment."
+      - ""
+      - "&eThe global player flags won't have any effect on members,"
+      - "&eyou must set specific flags for each member."
+      - ""
+      - "&8➥ Left-click to configure global player flags."
+      - "&8➥ Right-click to configure environment flags."
+    type: PLAYERHEAD-e8b8c6a46d87cf86a55df214cf84bf45cca25edb9a676e96364dd6a6eea235b3
+  9:
+    name: "&9Miscellaneous Settings"
+    lore:
+      - "&7Rename, set description or displayname, set spawn..."
+      - ""
+      - "&8➥ Left-click to configure miscellaneous settings."
+    type: PLAYERHEAD-ec2ff244dfc9dd3a2cef63112e7502dc6367b0d02132950347b2b479a72366dd
+  10:
+    name: "&9Sub-Areas &8({subareas-enabled}&8)"
+    lore:
+      - "&7Manage sub-areas inside the region."
+      - ""
+      - "&7• Sub-Areas count: &6{region-subareas}"
+      - ""
+      - "&8➥ Left-click to manage sub-areas."
+    type: OAK_FENCE
+  11:
+    name: "&9Upkeep &8({upkeep-enabled}&8)"
+    lore:
+      - "&7• Chunks: &6{region-chunks}"
+      - "&7• Payment: &6{upkeep-amount}"
+      - "&7• Due In: &6{upkeep-date}"
+    type: EMERALD
+  12:
+    name: "&9Rent &8({rent-enabled}&8)"
+    lore:
+      - "&7• Player: &6{rent-renter}"
+      - "&7• Price: &6{rent-price}"
+      - "&7• Expires In: &6{rent-until}"
+      - ""
+      - "&8➥ Left-click to cancel the lease."
+    type: PLAYERHEAD-89bd1ffae94fbe1c1ab0ce6420901e1a38354f6e414475a738996d759ccfa7f2
+  13:
+    name: "&9Logs"
+    lore:
+      - "&7View all logs for the region."
+      - ""
+      - "&7There are &6{region-logs} &7messages (&6{region-logs-unread} &7unread)."
+      - ""
+      - "&8➥ Left-click to read and manage the logs."
+    type: PLAYERHEAD-c2af9b072d19455809dc9d09d9da8bb32f63ad16b015ac772acd9a9f22c77098
+  14:
+    name: "&9Leave"
+    lore:
+      - "&7Quietly leave the region."
+      - ""
+      - "&8➥ Left-click to leave this region."
+    type: OAK_DOOR
+  15:
+    name: "&9Information"
+    lore:
+      - "&7• Owner: &3{region-owner}"
+      - "&7• Bank: &c{region-bank}"
+      - "&7• Created At: &6{region-createdat}"
+      - "&7• Chunks: &6{region-chunks}"
+      - "&7• Members: &6{region-members}"
+      - ""
+      - "&7• Global Rank: &d#{region-global-rank}"
+      - "&7• Rank By Bank: &a#{region-rank-bank}"
+      - "&7• Rank By Chunks: &a#{region-rank-chunks}"
+      - "&7• Rank By Members: &a#{region-rank-members}"
+      - "&7• Rank By Rating: &a#{region-rank-rating}"
+    type: PLAYERHEAD-e19997593f2c592b9fbd4f15ead1673b76f519d7ab3efa15edd19448d1a20bfc
+  16:
+    name: "&9Weather & Time"
+    lore:
+      - "&7• Weather: &6{region-weather}"
+      - "&7• Time: &6{region-time}"
+      - ""
+      - "&8➥ Left-click to change the weather."
+      - "&8➥ Right-click to change the time."
+    type: PLAYERHEAD-65f37826161c792d7f6c920b2fa06b88e6845288ab02ad9b65d4bbf5ca2ce1e3
+  17:
+    name: "&7Flag: &6{flag}"
+    lore:
+      - "&7{flag-description}"
+      - ""
+      - "&7• State: {state}"
+      - "&7• Unlocked: {flag-allowed}"
+      - ""
+      - "&8➥ Left-click to change the state."
+  18:
+    name: "&9Trusted Players"
+    lore:
+      - "&7Untrust or set flags for trusted players."
+      - ""
+      - "&7• Members: &6{region-members}"
+      - ""
+      - "&8➥ Left-click to view the members."
+    type: PLAYERHEAD-d1d2b7dd66ffd86ad4709927b175e83f1a9e10fbc864b2390403708f39d8efd8
+  19:
+    name: "&9Banned Players"
+    lore:
+      - "&7Ban or unban players."
+      - ""
+      - "&eYou cannot trust any banned player. You must"
+      - "&eunban them to send an invite."
+      - ""
+      - "&7• Banned players: &6{region-banned-players}"
+      - ""
+      - "&8➥ Left-click to manage banned players."
+    type: BARRIER
+  20:
+    name: "&9Invited Players"
+    lore:
+      - "&7Invite or revoke invitation of players."
+      - ""
+      - "&7• Invited players: &6{region-invited-players}"
+      - ""
+      - "&8➥ Left-click to manage invitations."
+    type: WRITABLE_BOOK
+  21:
+    name: "&3{playername}"
+    lore:
+      - "&7The player is currently {player-status}&7."
+      - ""
+      - "&7• Balance: &c{player-balance}"
+      - "&7• Ping: &a{player-ping}"
+      - "&7• Joined At: &6{player-joinedat}"
+    type: PLAYERHEAD-this
+  22:
+    name: "&9Owned Regions"
+    lore:
+      - "{player-owned-regions}"
+    type: PLAYERHEAD-e19997593f2c592b9fbd4f15ead1673b76f519d7ab3efa15edd19448d1a20bfc
+  23:
+    name: "&9Regions as Member"
+    lore:
+      - "{player-trusted-regions}"
+    type: PLAYERHEAD-ae156eb5affddf208617aab7b430fad9f2c991ec2f38304a0c213f31e76cbbe4
+  24:
+    name: "&3{playername}"
+    lore:
+      - "&7This player is trusted in the region &2{region}&7."
+      - ""
+      - "&7• Joined At: &6{member-joinedat}"
+      - "&7• Taxes Amount: &c{tax-amount}"
+      - "&7• Taxes Due In: &6{taxes-dueon}"
+      - ""
+      - "&8➥ Shift + Left-click to remove the player."
+      - "&8➥ Shift + Right-click to view detailed information."
+      - "&8➥ Left-click to configure player flags."
+      - "&8➥ Right-click to configure region control flags."
+    type: PLAYERHEAD-this
+  25:
+    name: "&9Region: &2{region}"
+    lore:
+      - "&7• Owner: &3{region-owner}"
+      - "&7• Created At: &6{region-createdat}"
+      - "&7• Bank: &c{region-bank}"
+      - "&7• Rating: &r{region-rating}"
+      - ""
+      - "&7• Global Rank: &d#{region-global-rank}"
+      - "&7• Rank By Bank: &a#{region-rank-bank}"
+      - "&7• Rank By Chunks: &a#{region-rank-chunks}"
+      - "&7• Rank By Members: &a#{region-rank-members}"
+      - "&7• Rank By Rating: &a#{region-rank-rating}"
+    type: PLAYERHEAD-e19997593f2c592b9fbd4f15ead1673b76f519d7ab3efa15edd19448d1a20bfc
+  26:
+    name: "&9Members"
+    lore:
+      - "{region-members}"
+    type: PLAYER_HEAD
+  27:
+    name: "&3{playername}"
+    lore:
+      - "&7This player is permanently banned."
+      - ""
+      - "&7• Banned At: &6{player-bannedat}"
+      - "&7• Reason: &f{player-banreason}"
+      - ""
+      - "&8➥ Left-click to unban the player."
+    type: PLAYERHEAD-this
+  28:
+    name: "&9Ban Player"
+    lore:
+      - "&7Ban a player by its name."
+      - ""
+      - "&8➥ Left-click to ban a player."
+    type: MACE
+  29:
+    name: "&9Invite Player"
+    lore:
+      - "&7Invite a player to this region."
+      - ""
+      - "&8➥ Left-click to invite a player."
+    type: PLAYERHEAD-5ff31431d64587ff6ef98c0675810681f8c13bf96f51d9cb07ed7852b2ffd1
+  30:
+    name: "&3{playername}"
+    lore:
+      - "&7This player is invited, they need to accept"
+      - "&7to join this region."
+      - ""
+      - "&8➥ Left-click to revoke the invite."
+    type: WRITABLE_BOOK
+  31:
+    name: "&9Purge"
+    lore:
+      - "&7Revoke all invites."
+      - ""
+      - "&8➥ Left-click to purge."
+    type: BRUSH
+  32:
+    name: "&9Unban All"
+    lore:
+      - "&7Unban all banned players."
+      - ""
+      - "&8➥ Left-click to purge the bans."
+    type: BRUSH
+  33:
+    name: "&9Chunk #{index}"
+    lore:
+      - "&7This chunk is part of the region &2{region}&7."
+      - ""
+      - "&7• Claimed At: &6{chunk-claimedat}"
+      - "&7• Location: &6{chunk-location}"
+      - ""
+      - "&8➥ Left-click to unclaim this chunk."
+      - "&8➥ Right-click to teleport to the chunk."
+    type: CUSTOM::GETBYWORLD
+  34:
+    name: "&9Rename Region"
+    lore:
+      - "&7Rename the region, the current name"
+      - "&7is: &2{region}"
+      - ""
+      - "&8➥ Left-click to rename this region."
+    type: NAME_TAG
+  35:
+    name: "&9Set Displayname"
+    lore:
+      - "&7Set the displayname of the region, current"
+      - "&7one is: &2{region-displayname}"
+      - ""
+      - "&eThe display name is the actual name of the"
+      - "&eregion, which you can use spaces and any"
+      - "&echaracter!"
+      - ""
+      - "&8➥ Left-click to set the displayname."
+    type: NAME_TAG
+  36:
+    name: "&9Set Description"
+    lore:
+      - "&7Set the description of the region, current"
+      - "&7one is: &r{region-description}"
+      - ""
+      - "&7Custom variables:"
+      - "&7• &a%player%&7: The player that entered the region"
+      - ""
+      - "&8➥ Left-click to set the description."
+    type: OAK_SIGN
+  37:
+    name: "&9Set Location"
+    lore:
+      - "&7Set the region's location to your current position."
+      - ""
+      - "&8➥ Left-click to update the location."
+    type: ENDER_PEARL
+  38:
+    name: "&9Transfer Ownership"
+    lore:
+      - "&7Give your region to another player."
+      - ""
+      - "&c&lWarning:"
+      - "&cThis action is permanent, which means once you"
+      - "&ctransfer the ownership, you will never own this"
+      - "&cregion again. All the members, chunks, and bank"
+      - "&cwill not be modified except the new owner."
+      - ""
+      - "&8➥ Left-click to transfer ownership."
+    type: PLAYER_HEAD
+  39:
+    name: "&9Log #{index}"
+    lore:
+      - "&a&lNew message!"
+      - ""
+      - "&7• Author: &3{log-author}"
+      - "&7• Sent At: &6{log-sentat}"
+      - ""
+      - "&f{log-message}"
+      - ""
+      - "&8➥ Left-click to mark it as read."
+      - "&8➥ Right-click to delete this log."
+    type: BOOK
+  40:
+    name: "&9Log #{index}"
+    lore:
+      - "&7• Author: &3{log-author}"
+      - "&7• Sent At: &6{log-sentat}"
+      - ""
+      - "&f{log-message}"
+      - ""
+      - "&8➥ Right-click to delete this log."
+    type: ENCHANTED_BOOK
+  41:
+    name: "&9Purge"
+    lore:
+      - "&7Remove all logs."
+      - ""
+      - "&8➥ Left-click to purge."
+    type: BRUSH
+  42:
+    name: "&2{subarea}"
+    lore:
+      - "&7This sub-area is inside the region &2{region}&7."
+      - ""
+      - "&7• Volume: &6{subarea-volume}"
+      - "&7• Created At: &6{subarea-createdat}"
+      - ""
+      - "&8➥ Left-click to manage the sub-area."
+    type: OAK_FENCE
+  43:
+    name: "&9Rename Sub-Area"
+    lore:
+      - "&7Rename the sub-area, the current name"
+      - "&7is: &2{subarea}"
+      - ""
+      - "&8➥ Left-click to rename this sub-area."
+    type: NAME_TAG
+  44:
+    name: "&9Flags"
+    lore:
+      - "&7Set flags for global players."
+      - ""
+      - "&eRegion members won't have any effect with"
+      - "&ethe sub-area's flags!"
+      - ""
+      - "&8➥ Left-click to set the flags."
+    type: PLAYERHEAD-e8b8c6a46d87cf86a55df214cf84bf45cca25edb9a676e96364dd6a6eea235b3
+  45:
+    name: "&9Delete"
+    lore:
+      - "&7Delete the sub-area."
+      - ""
+      - "&8➥ Left-click to delete the sub-area."
+    type: BARRIER
+  46:
+    name: "&9Mark All as Read"
+    lore:
+      - "&7Mark all logs as read."
+      - ""
+      - "&8➥ Left-click to mark them."
+    type: BOOKSHELF
+  47:
+    name: "&2{region} &7(&2{region-displayname}&7)"
+    lore:
+      - "&7• Owner: &3{region-owner}"
+      - "&7• Bank: &c{region-bank}"
+      - "&7• Created At: &6{region-createdat}"
+      - ""
+      - "&8➥ Left-click to configure."
+    type: PLAYERHEAD-e19997593f2c592b9fbd4f15ead1673b76f519d7ab3efa15edd19448d1a20bfc
+  48:
+    name: "&c★"
+    lore:
+      - "&8➥ Left-click to rate."
+    type: RED_STAINED_GLASS
+  49:
+    name: "&6★★"
+    lore:
+      - "&8➥ Left-click to rate."
+    type: ORANGE_STAINED_GLASS
+  50:
+    name: "&e★★★"
+    lore:
+      - "&8➥ Left-click to rate."
+    type: YELLOW_STAINED_GLASS
+  51:
+    name: "&a★★★★"
+    lore:
+      - "&8➥ Left-click to rate."
+    type: LIME_STAINED_GLASS
+  52:
+    name: "&2★★★★★"
+    lore:
+      - "&8➥ Left-click to rate."
+    type: GREEN_STAINED_GLASS
+  53:
+    name: "&7You have never rated this region before!"
+    type: PAPER
+  54:
+    name: "&7You rated this region: &r{player-rate}"
+    type: PAPER
+  55:
+    name: "&d#{rank} &2{region} &7(&2{region-displayname}&7)"
+    lore:
+      - "&7• Owner: &3{region-owner}"
+      - "&7• Created At: &6{region-createdat}"
+      - "&7• Bank: &c{region-bank}"
+      - "&7• Rating: &r{region-rating}"
+      - "&7• Members: &6{region-members}"
+      - "&7• Chunks: &6{region-chunks}"
+      - ""
+      - "&8➥ Left-click to show detailed information."
+    type: PLAYERHEAD-e19997593f2c592b9fbd4f15ead1673b76f519d7ab3efa15edd19448d1a20bfc
+  56:
+    name: "&9Filter"
+    lore:
+      - "&a➤ Bank"
+      - "&7➤ Chunks"
+      - "&7➤ Members"
+      - "&7➤ Oldest"
+      - "&7➤ Rating"
+      - ""
+      - "&8➥ Left-click or right-click to change the filter."
+    type: HOPPER
+  57:
+    name: "&9Filter"
+    lore:
+      - "&7➤ Bank"
+      - "&a➤ Chunks"
+      - "&7➤ Members"
+      - "&7➤ Oldest"
+      - "&7➤ Rating"
+      - ""
+      - "&8➥ Left-click or right-click to change the filter."
+    type: HOPPER
+  58:
+    name: "&9Filter"
+    lore:
+      - "&7➤ Bank"
+      - "&7➤ Chunks"
+      - "&a➤ Members"
+      - "&7➤ Oldest"
+      - "&7➤ Rating"
+      - ""
+      - "&8➥ Left-click or right-click to change the filter."
+    type: HOPPER
+  59:
+    name: "&9Filter"
+    lore:
+      - "&7➤ Bank"
+      - "&7➤ Chunks"
+      - "&7➤ Members"
+      - "&a➤ Oldest"
+      - "&7➤ Rating"
+      - ""
+      - "&8➥ Left-click or right-click to change the filter."
+    type: HOPPER
+  60:
+    name: "&9Filter"
+    lore:
+      - "&7➤ Bank"
+      - "&7➤ Chunks"
+      - "&7➤ Members"
+      - "&7➤ Oldest"
+      - "&a➤ Rating"
+      - ""
+      - "&8➥ Left-click or right-click to change the filter."
+    type: HOPPER
+  61:
+    name: "&9Rating"
+    lore:
+      - "&7Rate this region based on stars count!"
+      - ""
+      - "&8➥ Left-click to rate this region."
+    type: NETHER_STAR
+
+button-types:
+  world:
+    overworld: PLAYERHEAD-61b635bc92dd20011d6e7d01257e6ea737b49fb7de941d3bbd1877104fc5eb1e
+    nether: PLAYERHEAD-99c6a378a72da175831c9394fa45eb7343f31d7d058fa76a9a646be007b7888d
+    the_end: PLAYERHEAD-bba96aa005acf805a15b3ba49e5004dcff0cc127c57be0266b8b7a52dd8df753
+  

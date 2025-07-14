@@ -1,0 +1,451 @@
+# Homestead, the premium-free grief prevention plugin.
+# Developed by: T.F.A <3
+
+# This is the configuration file for the Homestead plugin.
+# Made a mistake in this file? Delete the file, and restart the server. The plugin will generate a new one for you.
+# Posting spam in my repository's issues section or in the Spigot review section with "It doesn't work" won't fix the plugin.
+# If you have a genuine bug report or a suggestion, please create a new "issue" on GitHub. Thank you!
+
+# Receive important messages (such as dynamic maps update, cache update...) in the console?
+# Use "true" to enable, "false" to disable.
+# NOTE: This may flood the "logs.txt" file if your server is extremely active.
+debug: false
+
+############################################################
+# +------------------------------------------------------+ #
+# |                      Language                        | #
+# +------------------------------------------------------+ #
+############################################################
+
+# The language to use from the languages folder.
+# NOTE: If the language file was not found, "en-US" will be used as the default.
+language: "en-US"
+
+############################################################
+# +------------------------------------------------------+ #
+# |                      Database                        | #
+# +------------------------------------------------------+ #
+############################################################
+
+# How would you like to store regions data?
+# Available database providers:
+# - PostgreSQL: postgresql (Recommended for advanced servers)
+# - MySQL: mysql (Recommended for advanced servers)
+# - SQLite: sqlite (Recommended for small servers)
+# - YAML: yaml
+# WARNING 1: If you selected PostgreSQL or MySQL, please create a new database (postgre) or a new schema (mysql) with the name: "homestead_data"
+# WARNING 2: PostgreSQL JDBC Driver is bundled within the plugin's dependencies! There is no need to download the driver and load it in the server's libraries.
+database:
+  provider: "sqlite"
+
+  # PostgreSQL configuration:
+  postgresql:
+    username: "USERNAME"
+    password: "PASSWORD"
+    host: "localhost"
+    port: 3306
+
+  # MySQL configuration:
+  mysql:
+    username: "USERNAME"
+    password: "PASSWORD"
+    host: "localhost"
+    port: 3306
+
+  # SQLite configuration:
+  # NOTE: The data file will be saved in the server's main directory.
+  sqlite: "homestead_data.db"
+
+# The interval for cache to save regions data to the database (in seconds).
+# If you are using SQLite and your server has many active players, we recommend you to higher the interval to 300 seconds (5 minutes).
+cache-interval: 30 # 30 seconds (Good for PostgreSQL, MySQL, and YAML)
+
+############################################################
+# +------------------------------------------------------+ #
+# |                       Regions                        | #
+# +------------------------------------------------------+ #
+############################################################
+
+# Disabled worlds; The worlds which players cannot claim chunks.
+disabled-worlds:
+  - "world_the_end"
+  - "factions"
+  - "pvp_arena"
+
+# Disabled Flags; The flags which players cannot change its state for their regions.
+# You can disable all types of flags; World, Players, and Region Control flags
+disabled-flags:
+  - "use-bells"
+  - "take-fall-damage"
+
+# Region enter and leave titles; Customize the messages for players when entering or leaving a region.
+enter-exit-region-message:
+  # Enable this feature? "true" to enable, "false" to disable.
+  enabled: true
+
+  # The type of messages
+  # - "title": Sends the titles and sub-titles to the player
+  # - "actionbar": Sends the messages to the player using Actionbars.
+  # - "chat": Sends the messages to the player in chat.
+  type: 'title'
+
+  # The messages to send to the players:
+  messages:
+    enter:
+      title: ["&2{region-displayname}", "&7{region-description}"]
+      actionbar: "&7You enter the territory of &2{region-displayname}&7: {region-description}"
+      chat: "&7You enter the territory of &2{region-displayname}&7: {region-description}"
+    exit:
+      title: ["&3Wilderness", "&7Roam the wild!"]
+      actionbar: "&7You left the territory of &2{region-displayname}&7."
+      chat: "&7You left the territory of &2{region-displayname}&7."
+
+# Selection tool; A tool that allows players to create sub-areas inside their regions.
+selection-tool:
+  # The item that will be used as selection tool.
+  item: GOLDEN_HOE
+
+  # The messages to send to the players:
+  messages:
+    none: "&7Please select two corners inside your region."
+    firstCorner: "&7First corner: &a✔ &7| &7Second corner: &c✘"
+    secondCorner: "&7First corner: &c✘ &7| &7Second corner: &a✔"
+    selectionDone: "&7Use &e/rg subareas create [name] &7to create a sub-area."
+
+# Upkeep regions; Region owners must pay an amount of money to keep-up their chunks, or else some or all of them will be unclaimed.
+upkeep:
+  # Enable this feature? "true" to enable, "false" to disable.
+  enabled: true
+
+  # How much should a region pay per chunk?
+  # Example: A region has 8 claimed chunks. If the amount per chunk is $100, the region must pay $800.
+  per-chunk: 100.0 # $100
+
+  # Should the last claimed chunks, which the land could not pay for, be unclaimed?
+  # Example: A region has 10 claimed chunks, but it can pay the upkeep only for 6, so the 4 last claimed chunks will be unclaimed.
+  unclaim-chunks: true
+
+  # Exclude region from upkeep, if it was recently created?
+  # This is an important feature, because newly created regions may not have enough money to upkeep, so this setting will give a period of time for
+  # region owners to pay in the future.
+  # Use seconds below. To disable this setting, use 0 (no delay).
+  start-upkeep: 604800 # 1 week (in seconds)
+
+  # Set the upkeep timer for regions.
+  # Example: If you set 1 week, and then a region paid the upkeep, the timer will reset to 1 week for THAT region. This means the timer won't make all
+  # regions to upkeep at the same time.
+  upkeep-timer: 604800 # 1 week (in seconds)
+
+# Taxes for region members; Members must pay an amount of money to stay in the regions they're trusted in, or else they will be kicked.
+taxes:
+  # Enable this feature? "true" to enable, "false" to disable.
+  enabled: true
+
+  # The minimum tax value.
+  min-tax: 0.0 # $0
+
+  # The maximum tax value.
+  max-tax: 10000.0 # $10k (k = Thousand)
+
+  # Set the tax timer for region members:
+  # Example: If you set 1 week, and then a member paid taxes, the timer will reset to 1 week for THAT member. This means the timer won't make all
+  # members to pay taxes at the same time.
+  tax-timer: 604800 # 1 week (in seconds)
+
+# Rent regions; Allow players to rent their regions to other players?
+renting:
+  # Enable this feature? "true" to enable, "false" to disable.
+  enabled: true
+
+  # The minimum rent value.
+  min-rent: 500.0 # $500
+
+  # The maximum rent value.
+  max-rent: 10000000.0 # $10M (M = Million)
+
+# Selling regions; Allow players to sell their regions to other players?
+selling:
+  # Enable this feature? "true" to enable, "false" to disable.
+  enabled: true
+
+  # The minimum sell value.
+  min-sell: 10.0 # $10
+
+  # The maximum sell value.
+  max-sell: 1000000000.0 # $1B (B = Billion)
+
+# Sub-Areas; Allow players to create sub-areas inside their regions?
+sub-areas:
+  # Enable this feature? "true" to enable, "false" to disable.
+  enabled: true
+
+# Welcome signs; Allow players to teleport regions using signs?
+welcome-signs:
+  # Enable this feature? "true" to enable, "false" to disable.
+  enabled: false
+
+############################################################
+# +------------------------------------------------------+ #
+# |                   Groups & Limits                    | #
+# +------------------------------------------------------+ #
+############################################################
+
+limits:
+  # Two valid options:
+  # - 'static': Static limits; No permission plugins required.
+  # - 'groups': Group limits; Permissions and groups plugin required (LuckPerms...)
+  method: 'static'
+
+  # The limits for player groups.
+  groups:
+    # Group: default
+    default:
+      regions: 2
+      chunks-per-region: 10
+      members-per-region: 4
+      subareas-per-region: 2
+      max-subarea-volume: 400
+      commands-cooldown: 2
+
+    # Group: vip
+    vip:
+      regions: 4
+      chunks-per-region: 20
+      members-per-region: 8
+      subareas-per-region: 5
+      max-subarea-volume: 800
+      commands-cooldown: 2
+
+    # Group: admin
+    admin:
+      regions: 10
+      chunks-per-region: 100
+      members-per-region: 16
+      subareas-per-region: 10
+      max-subarea-volume: 1200
+      commands-cooldown: 0
+
+  # The limits for operators and non-op players.
+  static:
+    # Limits for normal players (non operators):
+    non-op:
+      regions: 2
+      chunks-per-region: 10
+      members-per-region: 4
+      subareas-per-region: 2
+      max-subarea-volume: 400
+      commands-cooldown: 2
+
+    # Limits for server operators:
+    op:
+      regions: 10
+      chunks-per-region: 100
+      members-per-region: 16
+      subareas-per-region: 10
+      max-subarea-volume: 1200
+      commands-cooldown: 0
+
+############################################################
+# +------------------------------------------------------+ #
+# |                      Plugins                         | #
+# +------------------------------------------------------+ #
+############################################################
+
+# WorldGuard plugin; Implement WorldGuard features to Homestead! (Requires: WorldEdit)
+# To enable a feature, use "true" to enable, "false" to disable.
+worldguard:
+  # Protect existing WorldGuard regions (Spawn, PvP Arena...) from players claiming chunks?
+  protect-existing-regions: true
+
+# WorldEdit plugin; Implement WorldEdit features to Homestead!
+# To enable a feature, use "true" to enable, "false" to disable.
+worldedit:
+  # Regenerate chunks once a chunk is unclaimed?
+  # WARNING: THIS MAY CAUSE SEVERE LAG TO YOUR SERVER. PLEASE KEEP IN MIND
+  regenerate-chunks: false
+
+# PlaceholderAPI plugin; Replace variables to any string in Minecraft.
+placeholderapi:
+  # The default values for the placeholders.
+  default:
+    region_bank: "None" # The player's region's bank.
+    region_name: "None" # The player's region's name.
+    region_claimed_chunks: "0" # The player's region's claimed chunks count.
+    region_max_chunks: "0" # The player's maximum chunks to claim.
+    region_trusted_members: "0" # The player's region's trusted members count.
+    region_max_members: "0" # The player's maximum members to add.
+    region_current: "&2Wilderness" # The region where the player is currently inside.
+    upkeep_amount: "0,00" # The amount that the player must pay for taxes.
+    upkeep_at: "Never" # When the player must pay for taxes.
+
+# Dynamic maps; Show all regions on the web!
+# Supported plugins:
+# - dynmap
+# - Squaremap
+# - BlueMap
+# - Pl3xMap
+dynamic-maps:
+  # Enable this feature? "true" to enable, "false" to disable.
+  enabled: true
+
+  # The interval to update the regions on the web, use seconds.
+  update-interval: 60 # 60 seconds (1 minute)
+
+  # The icons for regions.
+  # NOTE: ".png"s are the only supported image format.
+  icons:
+    # Enable this feature? "true" to enable, "false" to disable.
+    # NOTE: If you enable icons, players can set custom icons for their regions.
+    enabled: true
+
+    # The default icon.
+    default: https://imgur.com/TUQzlCK.png
+
+    # The size for icons, must be a valid integer.
+    size: 20 # 20x20
+
+    # The list of icons that players can use. You can add as many icons as you want!
+    list:
+      Hut: https://imgur.com/GFrfD0H.png
+      Outpost: https://imgur.com/4EvpONv.png
+      Mansion: https://imgur.com/62ofr2V.png
+      Igloo: https://imgur.com/OgBJV1H.png
+      Gateway: https://imgur.com/7saPOc2.png
+      Fortress: https://imgur.com/pqSHXJ6.png
+      EndCity: https://imgur.com/bKRiedi.png
+      Desert: https://imgur.com/EjQ5QJk.png
+      Bastion: https://imgur.com/FwuLrG4.png
+      Netherite: https://i.imgur.com/DTpAqCP.png
+      Diamond: https://imgur.com/MQSe8Qs.png
+
+  # Customization; HTML syntax is supported!
+  # Available variables:
+  # - {region}: The region that owns the chunk
+  # - {region-owner}: The region's owner
+  # - {region-members}: The region's members
+  # - {region-chunks}: The region's claimed chunks count
+  chunks:
+    # For chunks that are owned by a server operator.
+    operator-color: 0xFF0000 # RGB; Red, Green, Blue: 255, 0, 0
+    operator-description: "<div style='font-size:16px;'><b>[Operator] {region} (#{global-rank})</b></div>{region-description}<br><br><b>Owner</b>: {region-owner}<br><b>Members</b>: {region-members}<br><b>Chunks</b>: {region-chunks}<br><b>Size</b>: {region-size} blocks"
+
+    # For chunks that are owned by ordinary players (non operators).
+    color: 0x00FF00 # RGB; Red, Green, Blue: 0, 255, 0
+    description: "<div style='font-size:16px;'><b>{region} (#{global-rank})</b></div>{region-description}<br><br><b>Owner</b>: {region-owner}<br><b>Members</b>: {region-members}<br><b>Chunks</b>: {region-chunks}<br><b>Size</b>: {region-size} blocks"
+
+############################################################
+# +------------------------------------------------------+ #
+# |                    Miscellanous                      | #
+# +------------------------------------------------------+ #
+############################################################
+
+# Delayed teleport; Set a custom delay for players to teleport to a region.
+delayed-teleport:
+  # Enable this feature? "true" to enable, "false" to disable.
+  enabled: true
+
+  # How many seconds should be the delay?
+  delay: 3 # 3 seconds
+
+  # Cancel teleportation if the player moves?
+  cancel-on-move: true
+
+  # Ignore operators?
+  # If enabled ("true"), operators will teleport instantly without any delay.
+  ignore-operators: true
+
+# Formatters; These are the formatters for all strings.
+# DO NOT EDIT THESE FORMATS IF YOU DO NOT KNOW WHAT YOU ARE DOING!
+formatters:
+  date-format: "dd/M/yyyy hh:mm a"
+  date: "{date} &7({time-ago} ago)"
+  balance: "${balance}"
+  location: "&6{world} &e(X: &6{x} &eY: &6{y} &eZ: &6{z}&e)"
+  chunk: "&6{world} &e(X: &6{x} &eZ: &6{z}&e)"
+  player-regions: "&7• &2{region}"
+  player-regions-joining: "\n"
+  region-members: "&7• &3{playername}"
+  region-members-joining: "\n"
+  gui-pagination-title: "&r{title} &r| &3{current-page}&r/&c{total-pages}"
+  remaining-time: "{d} days, {h} hours, {m} minutes, {s} seconds"
+  ago-days: "{v} days"
+  ago-hours: "{v} hours"
+  ago-minutes: "{v} minutes"
+  ago-seconds: "{v} seconds"
+
+############################################################
+# +------------------------------------------------------+ #
+# |                 Global Player Flags                  | #
+# +------------------------------------------------------+ #
+############################################################
+
+# Global Player Flags apply to non-members of regions.
+# Supported values: "true" = Allow, "false" = Deny
+# NOTE: If a player is added as a member of a region, their default flags will be set according to the global player flags.
+default-players-flags:
+  break-blocks: false # Break blocks: Allow players to break blocks?
+  place-blocks: false # Place blocks: Allow players to place blocks?
+  containers: false # Containers: Allow players to open containers? NOTE: This won't affect anvils, ender chests, enchanting tables, or villagers' workstations.
+  doors: false # Doors: Allow players to use doors?
+  trap-doors: false # Trapdoors: Allow players to use trapdoors?
+  fence-gates: false # Fence gates: Allow players to use fence gates?
+  use-anvil: false # Anvils: Allow players to use anvils? NOTE: Set this to "false" to prevent abuse, such as renaming items until all anvils break.
+  redstone: false # Redstone: Allow players to use redstone? NOTE: Levers, buttons, and pressure plates are unaffected by this setting.
+  levers: false # Levers: Allow players to use levers?
+  buttons: false # Buttons: Allow players to use buttons?
+  pressure-plates: false # Pressure plates: Allow players to step on pressure plates?
+  use-bells: false # Use bells: Allow players to use bells?
+  trigger-tripwire: false # Trigger tripwire: Allow players to trigger tripwires?
+  frost-walker: false # Frost Walker: Allow players to generate ice with Frost Walker boots?
+  harvest-crops: false # Crops: Allow players to harvest crops?
+  block-trampling: false # Block trampling: Allow players to trample blocks?
+  general-interaction: false # General interaction: Allow players to interact with items, such as spinning item frames, eating cake, or extinguishing candles.
+  armor-stands: false # Armor stands: Allow players to interact with armor stands?
+  interact-entities: false # Entities: Allow players to interact with entities? NOTE: Villagers are unaffected by this setting.
+  item-frame-rotation: false # Item frame rotation: Allow players to rotate item frames?
+  damage-passive-entities: false # Passive entities: Allow players to harm passive entities, such as sheep and cows?
+  damage-hostile-entities: false # Hostile entities: Allow players to harm hostile entities, such as zombies and skeletons?
+  trade-villagers: false # Villagers: Allow players to trade with villagers?
+  ignite: false # Fire: Allow players to start fires?
+  vehicles: false # Vehicles: Allow players to ride vehicles, such as horses, minecarts, or pigs?
+  teleport-spawn: false # Teleport to spawn: Allow players to teleport to the region's spawn point?
+  passthrough: true # Passthrough: Allow players to enter the region?
+  pvp: false # PvP: Allow players to engage in player-vs-player combat?
+  take-fall-damage: true # Take fall damage: Allow players to take fall damage?
+  teleport: false # Teleport: Allow players to teleport using ender pearls or chorus fruit?
+  throw-potions: false # Potions: Allow players to throw potions? For security, it's recommended to set this to "false."
+  pickup-items: true # Items: Allow players to pick up items?
+  sleep: false # Sleep: Allow players to sleep in beds within the region?
+  trigger-raid: false # Raids: Allow players to trigger raids?
+  elytra: true # Elytra: Allow players to fly using an Elytra?
+
+############################################################
+# +------------------------------------------------------+ #
+# |                     World Flags                      | #
+# +------------------------------------------------------+ #
+############################################################
+
+# World Flags configure the environment for regions.
+# These flags don't affect non-claimed chunks.
+# Supported values: "true" = Allow, "false" = Deny
+default-world-flags:
+  passive-entities-spawn: true # Passive entities: Allow passive entities, such as sheep and cows, to spawn in the region?
+  hostile-entities-spawn: true # Hostile entities: Allow hostile entities, such as zombies and skeletons, to spawn in the region?
+  entities-grief: false # Entity griefing: Allow entities, such as ravagers and endermen, to cause damage in the region?
+  entities-damage-entities: false # Entity combat: Allow entities to attack each other?
+  leaves-decay: true # Leaves decay: Allow leaves to decay naturally?
+  fire-spread: false # Fire spread: Allow fire to spread? It's recommended to set this to "false" to prevent fire from spreading into the region.
+  liquid-flow: false # Liquid flow: Allow liquids (water or lava) to flow into the region?
+  explosions-damage: false # Explosions: Allow explosions, such as TNT or creepers, to damage the region?
+  wither-damage: false # Wither damage: Allow withers to do damage in the region?
+  wilderness-pistons: false # Wilderness pistons: Allow pistons outside regions to push/pull blocks into the region?
+  wilderness-dispensers: false # Wilderness dispensers: Allow dispensers outside regions to interact with the region?
+  wilderness-minecarts: false # Wilderness minecarts: Allow minecarts outside regions to enter the region?
+  plant-growth: true # Plant growth: Allow plants to grow within the region?
+  grass-growth: true # Grass growth: Allow grass and mycelium to grow within the region?
+  sculk-spread: true # Sculk spread: Allow sculk to spread within the region?
+  player-glowing: true # Player glowing: Allow all players to have glowing effect?
+  snow-melting: true # Snow melting: Allow snow to melt?
+  ice-melting: true # Ice melting: Allow ice to melt?
+  snowman-trails: true # Snowman trails: Allow snow golems to leave snow trails?
+  windcharge-burst: false # Windcharge burst: Allow windcharges to burst?

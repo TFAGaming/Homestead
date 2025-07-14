@@ -1,0 +1,396 @@
+default:
+  description: "Owned by {owner}"
+  reason: "No reason was provided"
+  none: "&cNone"
+  isTrue: "&aTrue"
+  isFalse: "&cFalse"
+  isEnabled: "&aEnabled"
+  isDisabled: "&cDisabled"
+  flagSet: "&aAllow"
+  flagUnset: "&cDeny"
+  online: "&aonline"
+  offline: "&coffline"
+  banned: "&4banned"
+  star: "★"
+  author: Server
+
+prefix: "&8[&6HS&8]&r "
+0: "&7Insufficient arguments, please use: &e/help <command>"
+1: "&cThe region name must be alphanumerical, other characters are prohibited."
+2: "&cThe region name was taken, please choose another name."
+3: "&7Successfully created a new region: &2{name}"
+4: "&7You did not set a region as targeted region, please use: &e/hs set target [region]"
+5: "&cYou must confirm to complete the action."
+6: "&7The region &2{region} &7has been deleted, and you have got &c{region-bank}&7."
+7: "&7Unknown sub-command, maybe you meant... &e{similarity-subcmds}"
+8: "&cYou have no permissions to execute this command."
+9: "&cUnable to find a region with that name."
+10: "&cSorry, but you must be the owner or a member of the region to set it as targeted region."
+11: "&7Nothing has changed, same configuration was already applied."
+12: "&7The region &2{region} &7is now set as targeted region, any action that manages a region (like &e/claim&7, &e/region setspawn&7) will be executed to the targeted region."
+13: "&7Successfully renamed the region from &2{oldname} &7to &2{newname}&7."
+14: "&cThe displayname's length must between 2 and 64."
+15: "&7Successfully updated the region's displayname from &2{olddisplayname} &7to &2{newdisplayname}&7."
+16: "&cThe description's length must between 2 and 128."
+17: "&7Successfully updated the region's description."
+18: "&cInvalid color provided."
+19: "&7Successfully updated the map color from {oldcolor} &7to {newcolor}&7."
+20: "&cThis world is disabled, nobody can claim chunks here."
+21: "&cThis chunk was taken by another region (&2{region}&c)."
+22: "&7This chunk is now part of the region &2{region}&7. To unclaim this chunk, use: &e/unclaim"
+23: "&cYou cannot unclaim a chunk that you did not set as targeted region."
+24: "&7This chunk has been unclaimed and removed from &2{region}&7's claimlist."
+25: "&7This chunk is not claimed by any region, you can claim it using: &e/claim"
+26: "&7Successfully stopped spawning particles around regions' borders."
+27: "&7Successfully spawned particles around regions' borders."
+28: "&cYou are banned from the region &2{region} &cwith the reason: &7{ban-reason}"
+29: "&cUnable to find a player with the name &3{playername}&c."
+30: "&cSorry, but you cannot do this."
+31: "&7Successfully banned &3{playername} &7from &2{region} &7with the reason: {reason}"
+32: "&7The player &3{playername} &7is already been banned."
+33: "&7The player &3{playername} &7is not banned."
+34: "&7Successfully unbanned &3{playername} &7from &2{region}&7."
+35: "&7The player &3{playername} &7was invited, please wait until they accept or deny the invitation."
+36: "&7Successfully invited &3{playername}&7 to join &2{region}&7, please wait until they accept or deny your invitation!"
+37: "&7Successfully revoked the invite for &3{playername}&7."
+38: "&7Successfully removed &3{player} &7from the region &2{region}&7, they are no longer a member."
+39: "&cThe player &3{playername} &cis not invited or trusted in the region &2{region}&c."
+40: "&cThe player &3{playername} &cis not trusted in the region &2{region}&c."
+41: "&cInvalid flag provided."
+42: "&cThis flag is disabled, you cannot change its state for this region."
+43: "&7Flag &6{flag} &7was changed to &e{state} &7for the player &3{player} &7(Region: &2{region}&7)."
+44: "&7Flag &6{flag} &7was changed to &e{state} &7for all global players &7(Region: &2{region}&7)."
+45: "&cThe region &2{region} &cdid not invite you."
+46: "&7You accepted the invite, you are now a member of &2{region}&7!"
+47: "&7You denied the invite, you did not join the region &2{region}&7."
+48: "&cThe player &3{playername} &cis already trusted!"
+49: "&7Flag &6{flag} &7was changed to &e{state} &7for the environment &7(Region: &2{region}&7)."
+50: "&cSorry, but you do not have the permission to do that! &7(Flag: &6{flag}&7, Region: &2{region}&7)"
+51: "&7You have been teleported to this following location: {location}"
+52: "&cUnsafe location detected, request has been canceled."
+53: "&7Teleportation started, do not move for the next &33 seconds&7!"
+54: "&cYou must select two corners using a Golden Hoe."
+55: "&cAll the corners must be selected inside your region."
+56: "&cThe selected corners are intersecting another sub-area."
+57: "&cThe sub-area name must be alphanumerical, other characters are prohibited."
+58: "&cThis sub-area name is already taken, please use another one."
+59: "&7Successfully created a sub-area: &2{subarea} &7(Volume: &6{subarea-volume}&7)"
+60: "&cUnable to find a sub-area with that name."
+61: "&7Successfully renamed the sub-area from &2{oldname} &7to &2{newname}&7."
+62: "&7Successfully deleted the sub-area &2{subarea}&7."
+63: "&7Flag &6{flag} &7was changed to &e{state} &7for the sub-area &2{subarea} &7(Region: &2{region}&7)."
+64: "&cThe amount of money to deposit or withdraw must be a valid real number."
+65: "&cYou do not have that much money to deposit!"
+66: "&7Successfully deposited &c{amount} &7to the region &2{region}&7."
+67: "&cThe region doesn't have that much money to withdraw!"
+68: "&7Successfully withdrew &c{amount} &7from the region &2{region}&7."
+69: "&cThe Economy feature is temporarily disabled, please contact the server administrators to resolve the issue."
+70: "&cSorry, but you do not have the permission to manage this setting! &7(Flag: &6{flag}&7, Region: &2{region}&7)"
+71: "&cThe region &2{region} &chas no spawn location!"
+72: "&7Successfully updated the location of the region &2{region}&7. You may use &e/rg home &7to verify this location."
+73: "&7Please type the player's name to ban."
+74: "&cYou cannot invite a banned player! You must unban them to send an invite."
+75: "&7Please type the player's name to invite."
+76: "&cThere are no invites to revoke!"
+77: "&cThere are no bans to remove!"
+78: "&7Please type the new region's name."
+79: "&7Please type the new region's display name."
+80: "&7Please type the new region's description."
+81: "&7Please type the player's name to transfer ownership."
+82: "&7Successfully transfered ownership to &3{playername}&7. You are no longer the owner of the region &2{region}&7."
+83: "&cThere are no logs to remove!"
+84: "&cInvalid database provider, please use: SQLite, MySQL, or YAML"
+85: "&cProvider already in use, please choose another provider."
+86: "&7Successfully exported &6{regions} &7regions from &3{current-provider} &7to &3{selected-provider}&7."
+87: "&cSomething went wrong, please check the console for more information."
+88: "&7Please type the new sub-area's name."
+89: "&7Version: &6{plugin-version}\n&7Regions: &6{regions}\n&7Database provider: &3{provider}\n&7Latency (database): &a{avg-response-db}ms\n&7Latency (cache): &a{avg-response-cache}ms"
+90: "&aSuccessfully reloaded configuration files."
+91: "&cThere are no logs to update!"
+92: "&7Successfully marked all logs as read."
+93: "&7Successfully purged all logs."
+94: "&7Successfully unbanned all players."
+95: "&7Successfully revoked all invites."
+96: "&aYou are on the latest version of Homestead!"
+97: "&eFound an update! Download link: https://www.spigotmc.org/resources/121873/"
+98: "&7Please wait..."
+99: "&cInvalid icon provided!"
+100: "&7Successfully updated the icon for the region &2{region}&7."
+101:
+  - "&2Homestead&7, the premium-free land claiming plugin."
+  - ""
+  - "&aFor full guide, please visit the documentation:"
+  - "&a➥ &9https://tfagaming.gitbook.io/homestead"
+  - ""
+  - "&7Developers: &6T.F.A"
+  - "&cMade with ❤"
+102: "&cThe amount of money to set taxes must be a valid real number."
+103: "&7Successfully set the tax for all members to &c{tax-amount}&7 for the region &2{region}&7."
+104: "&cThe amount of money for taxes must be between {min} and {max}!"
+105: "&cThis feature is disabled for this server."
+106: "&7Successfully paid &c{amount} &7for the region &2{region}&7!"
+107: "&7Your current balance is now &c{balance}&7."
+108: "&cYou've been kicked from the region &2{region}&c, you are unable to pay taxes."
+109: "&7Successfully paid &c{amount} &7to upkeep the region &2{region}&7!"
+110: "&7The region's bank is now &c{bank}&7."
+111: "&cUnable to pay {amount} to upkeep the region &2{region}&c."
+112: "&cTotal chunks removed: &7{chunks} chunks"
+113: "&cUnknown plugin, possible plugins to import claims: GriefPrevention, ClaimChunk, LandLord"
+114: "&cThis plugin is not installed on this server, or its instance has been closed (plugin is disabled)."
+115: "&7Successfully imported &6{regions} &7regions."
+116: "&cI'm sorry, but you have reached your maximum limit."
+117: "&cI'm sorry, but you cannot create a sub-area with a volume exceeds &7{max}\n&cYou selected an area with a volume of &7{volume}&c."
+118: "&cYou are on cooldown! Use this command in few seconds..."
+119: "&cThe sign must be placed inside a region that you own!"
+120: "&cInvalid sign format."
+121: "&cThere are some lines must be empty."
+122: "&cInvalid price, please use a real number."
+123: "&cI'm sorry, but you cannot edit this sign!"
+124: "&7Successfully bought the region &2{region} &7for &c{price}&7."
+125: "&cYou cannot purchase this! You do not have enough money."
+126: "&7Successfully leased the region &2{region}&7. Your contract will end in: &6{rent-end}"
+127: "&7Successfully canceled the lease. The contract has ended."
+128: "&cThe region is not leased!"
+129: "&cThe duration is too long or too short!"
+130: "&eThe contract has ended, you have been kicked from the region &2{region}&e."
+131: "&cI'm sorry, but you cannot visit the region &2{region}&c!"
+132: "&cThis player has no regions with welcome signs!"
+133: "&cThis chunk is intersecting a WorldGuard protected region, please choose another chunk to claim."
+134: "&7Your review have been submitted!"
+135: "&7Auto-claim session has started! Wonder around to claim unclaimed chunks."
+136: "&7Auto-claim session has successfully ended."
+
+
+logs:
+  0: "&7Updated name from &2{oldname} &7to &2{newname}&7."
+  1: "&7Updated location to {location}."
+  2: "&7Added new member: &3{playername}"
+  3: "&7Removed a member: &3{player}"
+  4: "&3{playername} has left the region."
+  5: "&3{playername} has been kicked, they're unable to pay taxes."
+
+flags-info:
+  # PLAYER FLAGS
+  break-blocks:
+    description: "Allow players to break blocks?"
+    type: IRON_PICKAXE
+  place-blocks:
+    description: "Allow players to place blocks?"
+    type: OAK_LOG
+  containers:
+    description: "Allow players to open containers?"
+    type: CHEST
+  doors:
+    description: "Allow players to use doors?"
+    type: OAK_DOOR
+  trap-doors:
+    description: "Allow players to use trapdoors?"
+    type: OAK_TRAPDOOR
+  fence-gates:
+    description: "Allow players to use fence gates?"
+    type: OAK_FENCE_GATE
+  use-anvil:
+    description: "Allow players to use anvils?"
+    type: ANVIL
+  redstone:
+    description: "Allow players to use redstone?"
+    type: REDSTONE
+  levers:
+    description: "Allow players to use levers?"
+    type: LEVER
+  buttons:
+    description: "Allow players to use buttons?"
+    type: STONE_BUTTON
+  pressure-plates:
+    description: "Allow players to step on pressure plates?"
+    type: STONE_PRESSURE_PLATE
+  use-bells:
+    description: "Allow players to use bells?"
+    type: BELL
+  trigger-tripwire:
+    description: "Allow players to trigger tripwires?"
+    type: TRIPWIRE_HOOK
+  frost-walker:
+    description: "Allow players to generate ice with Frost Walker boots?"
+    type: DIAMOND_BOOTS
+  harvest-crops:
+    description: "Allow players to harvest crops?"
+    type: WHEAT_SEEDS
+  block-trampling:
+    description: "Allow players to trample blocks?"
+    type: TURTLE_EGG
+  general-interaction:
+    description: "Allow players to interact generally?\nGeneral interaction such as eating cake..."
+    type: STRING
+  armor-stands:
+    description: "Allow players to interact with armor stands?"
+    type: ARMOR_STAND
+  interact-entities:
+    description: "Allow players to interact with entities?"
+    type: SHEARS
+  item-frame-rotation:
+    description: "Allow players to rotate item frames?"
+    type: ITEM_FRAME
+  damage-passive-entities:
+    description: "Allow players to harm passive entities, such as sheep and cows?"
+    type: IRON_SWORD
+  damage-hostile-entities:
+    description: "Allow players to harm hostile entities, such as zombies and skeletons?"
+    type: ZOMBIE_HEAD
+  trade-villagers:
+    description: "Allow players to trade with villagers?"
+    type: EMERALD
+  ignite:
+    description: "Allow players to start fires?"
+    type: FLINT_AND_STEEL
+  vehicles:
+    description: "Allow players to ride vehicles, such as horses, minecarts, or pigs?"
+    type: MINECART
+  teleport-spawn:
+    description: "Allow players to teleport to the region's spawn point?"
+    type: ENDER_EYE
+  passthrough:
+    description: "Allow players to enter the region?"
+    type: IRON_BOOTS
+  pvp:
+    description: "Allow players to engage in player-vs-player combat?"
+    type: DIAMOND_SWORD
+  take-fall-damage:
+    description: "Allow players to take fall damage?"
+    type: FEATHER
+  teleport:
+    description: "Allow players to teleport using ender pearls or chorus fruit?"
+    type: CHORUS_FRUIT
+  throw-potions:
+    description: "Allow players to throw potions?"
+    type: SPLASH_POTION
+  pickup-items:
+    description: "Allow players to pick up items?"
+    type: SUNFLOWER
+  sleep:
+    description: "Allow players to sleep in beds within the region?"
+    type: RED_BED
+  trigger-raid:
+    description: "Allow players to trigger raids?"
+    type: PLAYERHEAD-4aee6bb37cbfc92b0d86db5ada4790c64ff4468d68b84942fde04405e8ef5333
+  elytra:
+    description: "Allow players to fly using an Elytra?"
+    type: ELYTRA
+
+  # WORLD FLAGS
+  passive-entities-spawn:
+    description: "Allow passive entities, such as sheep and cows, to spawn in the region?"
+    type: PLAYERHEAD-84e5cdb0edb362cb454586d1fd0ebe971423f015b0b1bfc95f8d5af8afe7e810
+  hostile-entities-spawn:
+    description: "Allow hostile entities, such as zombies and skeletons, to spawn in the region?"
+    type: SPAWNER
+  entities-grief:
+    description: "Allow entities, such as ravagers and endermen, to cause damage in the region?"
+    type: CREEPER_HEAD
+  entities-damage-entities:
+    description: "Allow entities to attack each other?"
+    type: IRON_SWORD
+  leaves-decay:
+    description: "Allow leaves to decay naturally?"
+    type: VINE
+  fire-spread:
+    description: "Allow fire to spread?"
+    type: FLINT_AND_STEEL
+  liquid-flow:
+    description: "Allow liquids (water or lava) to flow into the region?"
+    type: WATER_BUCKET
+  explosions-damage:
+    description: "Allow explosions, such as TNT or creepers, to damage the region?"
+    type: TNT
+  wither-damage:
+    description: "Allow withers to do damage in the region?"
+    type: PLAYERHEAD-74f328f5044129b5d1f96affd1b8c05bcde6bd8e756aff5c5020585eef8a3daf
+  wilderness-pistons:
+    description: "Allow pistons outside regions to push/pull blocks into the region?"
+    type: PISTON
+  wilderness-dispensers:
+    description: "Allow dispensers outside regions to interact with the region?"
+    type: DISPENSER
+  wilderness-minecarts:
+    description: "Allow minecarts outside regions to enter the region?"
+    type: MINECART
+  plant-growth:
+    description: "Allow plants to grow within the region?"
+    type: OAK_SAPLING
+  grass-growth:
+    description: "Allow grass and mycelium to grow within the region?"
+    type: GRASS_BLOCK
+  sculk-spread:
+    description: "Allow sculk to spread within the region?"
+    type: SCULK_SENSOR
+  player-glowing:
+    description: "Allow all players to have glowing effect?"
+    type: SPECTRAL_ARROW
+  snow-melting:
+    description: "Allow snow to melt?"
+    type: SNOW 
+  ice-melting:
+    description: "Allow ice to melt?"
+    type: ICE
+  snowman-trails:
+    description: "Allow snow golems to leave snow trails?"
+    type: PLAYERHEAD-e6f20aec528c3968dd8164f9d9336b081b3a2c7ecf189cf73df6f925e5a4ed14
+  windcharge-burst:
+    description: "Allow windcharges to burst?"
+    type: WIND_CHARGE
+
+  # REGION CONTROL FLAGS
+  trust-players:
+    description: "Allow the player to trust players?"
+    type: PLAYERHEAD-5ff31431d64587ff6ef98c0675810681f8c13bf96f51d9cb07ed7852b2ffd1
+  untrust-players:
+    description: "Allow the player to untrust players?"
+    type: PLAYERHEAD-4e4b8b8d2362c864e062301487d94d3272a6b570afbf80c2c5b148c954579d46
+  ban-players:
+    description: "Allow the player to ban players?"
+    type: MACE
+  unban-players:
+    description: "Allow the player to unban players?"
+    type: BARRIER
+  claim-chunks:
+    description: "Allow the player to claim chunks?"
+    type: PLAYERHEAD-61b635bc92dd20011d6e7d01257e6ea737b49fb7de941d3bbd1877104fc5eb1e
+  unclaim-chunks:
+    description: "Allow the player to unclaim chunks?"
+    type: GOLDEN_SHOVEL
+  deposit-money:
+    description: "Allow the player to deposit money?"
+    type: GOLD_NUGGET
+  withdraw-money:
+    description: "Allow the player to withdraw money?"
+    type: FEATHER
+  set-global-flags:
+    description: "Allow the player to set global player flags?"
+    type: LEVER
+  set-world-flags:
+    description: "Allow the player to set environment flags?"
+    type: LEVER
+  set-member-flags:
+    description: "Allow the player to set members' flags?"
+    type: LEVER
+  set-spawn:
+    description: "Allow the player to set the region's location?"
+    type: ENDER_EYE
+  manage-subareas:
+    description: "Allow the player to manage sub-areas?"
+    type: GOLDEN_HOE
+  rename-region:
+    description: "Allow the player to rename the region?"
+    type: NAME_TAG
+  set-description:
+    description: "Allow the player to update the description?"
+    type: OAK_SIGN
+  manage-logs:
+    description: "Allow the player to view the logs?"
+    type: BOOKSHELF
+  kick-players:
+    description: "Allow the player to kick players inside the region?"
+    type: RABBIT_FOOT
+  set-weather-and-time:
+    description: "Allow the player to set the weather and time of the region?"
+    type: PLAYERHEAD-65f37826161c792d7f6c920b2fa06b88e6845288ab02ad9b65d4bbf5ca2ce1e3

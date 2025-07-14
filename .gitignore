@@ -1,0 +1,5 @@
+target/
+homestead.jar
+.vscode
+src/test/
+.vscode
