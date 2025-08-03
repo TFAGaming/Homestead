@@ -5,7 +5,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
 
 import tfagaming.projects.minecraft.homestead.Homestead;
 import tfagaming.projects.minecraft.homestead.commands.SubCommandBuilder;
@@ -22,13 +21,6 @@ public class ReloadSubCmd extends SubCommandBuilder {
 
     @Override
     public boolean onExecution(CommandSender sender, String[] args) {
-        if (!(sender instanceof Player)) {
-            sender.sendMessage("You cannot use this command via the console.");
-            return false;
-        }
-
-        Player player = (Player) sender;
-
         Homestead instance = Homestead.getInstance();
 
         try {
@@ -79,11 +71,11 @@ public class ReloadSubCmd extends SubCommandBuilder {
                 }
             }
 
-            PlayerUtils.sendMessage(player, 90);
+            PlayerUtils.sendMessage(sender, 90);
         } catch (Exception e) {
             System.out.println(e);
 
-            PlayerUtils.sendMessage(player, 87);
+            PlayerUtils.sendMessage(sender, 87);
         }
 
         return true;

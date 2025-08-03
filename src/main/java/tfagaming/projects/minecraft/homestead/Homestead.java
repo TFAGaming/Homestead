@@ -24,7 +24,6 @@ import tfagaming.projects.minecraft.homestead.integrations.*;
 import tfagaming.projects.minecraft.homestead.integrations.maps.RegionIconTools;
 import tfagaming.projects.minecraft.homestead.listeners.*;
 import tfagaming.projects.minecraft.homestead.logs.Logger;
-import tfagaming.projects.minecraft.homestead.managers.RegionsManager;
 import tfagaming.projects.minecraft.homestead.tools.https.UpdateChecker;
 import tfagaming.projects.minecraft.homestead.tools.minecraft.plugins.IntegrationsUtils;
 import tfagaming.projects.minecraft.homestead.tools.validator.YAMLValidator;
@@ -232,10 +231,6 @@ public class Homestead extends JavaPlugin {
 		}, 86400); // 24 hours
 
 		registerExternalPlugins();
-
-		runAsyncTaskLater(() -> {
-			RegionsManager.updateDisabledFlagsForAll();
-		}, 5); // Updates all disabled flags
 	}
 
 	private void registerCommands() {

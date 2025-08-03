@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
 
 import tfagaming.projects.minecraft.homestead.Homestead;
 import tfagaming.projects.minecraft.homestead.commands.SubCommandBuilder;
@@ -18,29 +17,22 @@ public class MigrateDataSubCmd extends SubCommandBuilder {
 
     @Override
     public boolean onExecution(CommandSender sender, String[] args) {
-        if (!(sender instanceof Player)) {
-            sender.sendMessage("You cannot use this command via the console.");
-            return false;
-        }
-
-        Player player = (Player) sender;
-
         if (args.length < 2) {
-            PlayerUtils.sendMessage(player, 0);
+            PlayerUtils.sendMessage(sender, 0);
             return true;
         }
 
         String provider = args[1];
 
         if (Database.parseProviderFromString(provider) == null) {
-            PlayerUtils.sendMessage(player, 84);
+            PlayerUtils.sendMessage(sender, 84);
             return true;
         }
 
         String currentProvider = Homestead.database.getSelectedProvider();
 
         if (currentProvider.equalsIgnoreCase(provider)) {
-            PlayerUtils.sendMessage(player, 85);
+            PlayerUtils.sendMessage(sender, 85);
             return true;
         }
 
@@ -54,11 +46,11 @@ public class MigrateDataSubCmd extends SubCommandBuilder {
             replacements.put("{current-provider}", currentProvider);
             replacements.put("{selected-provider}", provider);
 
-            PlayerUtils.sendMessage(player, 86, replacements);
+            PlayerUtils.sendMessage(sender, 86, replacements);
 
             instance.closeConnection();
         } catch (Exception e) {
-            PlayerUtils.sendMessage(player, 87);
+            PlayerUtils.sendMessage(sender, 87);
         }
 
         return true;

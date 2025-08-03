@@ -9,6 +9,7 @@ import java.util.UUID;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import net.md_5.bungee.api.ChatMessageType;
@@ -62,32 +63,40 @@ public class PlayerUtils {
         player.sendMessage(ChatColorTranslator.translate(String.join("", messages)));
     }
 
-    public static void sendMessage(Player player, String path, Map<String, String> replacements) {
+    public static void sendMessage(CommandSender sender, String path, Map<String, String> replacements) {
         String message = Homestead.language.get(path);
 
         if (message == null) {
-            player.sendMessage("String not found from the language file: " + path);
+            sender.sendMessage("String not found from the language file: " + path);
             return;
         }
 
         message = Formatters.replace(message, replacements);
 
-        player.sendMessage(ChatColorTranslator.translate(Homestead.config.getPrefix() + message));
+        sender.sendMessage(ChatColorTranslator.translate(Homestead.config.getPrefix() + message));
     }
 
-    public static void sendMessage(Player player, String path) {
+    public static void sendMessage(CommandSender sender, String path) {
         String message = Homestead.language.get(path);
 
         if (message == null) {
-            player.sendMessage("String not found from the language file: " + path);
+            sender.sendMessage("String not found from the language file: " + path);
             return;
         }
 
-        player.sendMessage(ChatColorTranslator.translate(Homestead.config.getPrefix() + message));
+        sender.sendMessage(ChatColorTranslator.translate(Homestead.config.getPrefix() + message));
     }
 
     public static void sendMessage(Player player, int path, Map<String, String> replacements) {
         sendMessage(player, String.valueOf(path), replacements);
+    }
+
+    public static void sendMessage(CommandSender sender, int path, Map<String, String> replacements) {
+        sendMessage(sender, String.valueOf(path), replacements);
+    }
+
+    public static void sendMessage(CommandSender sender, int path) {
+        sendMessage(sender, String.valueOf(path));
     }
 
     public static void sendMessage(Player player, int path) {

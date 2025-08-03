@@ -24,23 +24,16 @@ public class HomesteadAdminCommand extends CommandBuilder {
 
     @Override
     public boolean onExecution(CommandSender sender, String[] args) {
-        if (!(sender instanceof Player)) {
-            sender.sendMessage("You cannot use this command via the console.");
-            return false;
-        }
-
-        Player player = (Player) sender;
-
         if (args.length < 1) {
-            PlayerUtils.sendMessage(player, 0);
+            PlayerUtils.sendMessage(sender, 0);
             return true;
         }
 
         String subCommand = args[0].toLowerCase();
 
         if (getSubcommands().contains(subCommand)) {
-            if (!player.hasPermission("homestead.commands.homesteadadmin." + subCommand)) {
-                PlayerUtils.sendMessage(player, 8);
+            if (sender instanceof Player && !sender.hasPermission("homestead.commands.homesteadadmin." + subCommand)) {
+                PlayerUtils.sendMessage(sender, 8);
                 return true;
             }
         }
@@ -69,7 +62,7 @@ public class HomesteadAdminCommand extends CommandBuilder {
                     Map<String, String> replacements = new HashMap<>();
                     replacements.put("{similarity-subcmds}", similaritySubCmds);
 
-                    PlayerUtils.sendMessage(player, 7, replacements);
+                    PlayerUtils.sendMessage(sender, 7, replacements);
                 } else {
                     sender.sendMessage("Unknown sub-command, maybe you meant...", similaritySubCmds);
                 }

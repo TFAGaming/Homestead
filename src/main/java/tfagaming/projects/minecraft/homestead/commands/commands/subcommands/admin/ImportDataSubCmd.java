@@ -10,7 +10,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
 
 import com.cjburkey.claimchunk.ClaimChunk;
 import com.cjburkey.claimchunk.chunk.ChunkPos;
@@ -33,15 +32,8 @@ public class ImportDataSubCmd extends SubCommandBuilder {
 
     @Override
     public boolean onExecution(CommandSender sender, String[] args) {
-        if (!(sender instanceof Player)) {
-            sender.sendMessage("You cannot use this command via the console.");
-            return false;
-        }
-
-        Player player = (Player) sender;
-
         if (args.length < 2) {
-            PlayerUtils.sendMessage(player, 0);
+            PlayerUtils.sendMessage(sender, 0);
             return true;
         }
 
@@ -50,7 +42,7 @@ public class ImportDataSubCmd extends SubCommandBuilder {
         switch (pluginInput.toLowerCase()) {
             case "griefprevention": {
                 if (!isGriefPreventionInstalled()) {
-                    PlayerUtils.sendMessage(player, 114);
+                    PlayerUtils.sendMessage(sender, 114);
                     return true;
                 }
 
@@ -85,13 +77,13 @@ public class ImportDataSubCmd extends SubCommandBuilder {
                 Map<String, String> replacements = new HashMap<>();
                 replacements.put("{regions}", String.valueOf(imported));
 
-                PlayerUtils.sendMessage(player, 115, replacements);
+                PlayerUtils.sendMessage(sender, 115, replacements);
 
                 break;
             }
             case "landlord": {
                 if (!isLandLordInstalled()) {
-                    PlayerUtils.sendMessage(player, 114);
+                    PlayerUtils.sendMessage(sender, 114);
                     return true;
                 }
 
@@ -157,13 +149,13 @@ public class ImportDataSubCmd extends SubCommandBuilder {
                 Map<String, String> replacements = new HashMap<>();
                 replacements.put("{regions}", String.valueOf(imported));
 
-                PlayerUtils.sendMessage(player, 115, replacements);
+                PlayerUtils.sendMessage(sender, 115, replacements);
 
                 break;
             }
             case "claimchunk": {
                 if (!isClaimChunkInstalled()) {
-                    PlayerUtils.sendMessage(player, 114);
+                    PlayerUtils.sendMessage(sender, 114);
                     return true;
                 }
 
@@ -200,12 +192,12 @@ public class ImportDataSubCmd extends SubCommandBuilder {
                 Map<String, String> replacements = new HashMap<>();
                 replacements.put("{regions}", String.valueOf(imported));
 
-                PlayerUtils.sendMessage(player, 115, replacements);
+                PlayerUtils.sendMessage(sender, 115, replacements);
 
                 break;
             }
             default:
-                PlayerUtils.sendMessage(player, 113);
+                PlayerUtils.sendMessage(sender, 113);
                 break;
         }
 

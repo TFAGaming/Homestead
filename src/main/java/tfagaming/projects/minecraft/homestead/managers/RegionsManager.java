@@ -348,19 +348,33 @@ public class RegionsManager {
         return count;
     }
 
-    public static void updateDisabledFlagsForAll() {
+    public static void setPlayerFlagForAllRegions(long flag, boolean state) {
         for (Region region : getAll()) {
-            for (String flagString : PlayerFlags.getFlags()) {
-                long flags = region.getPlayerFlags();
+            long flags = region.getPlayerFlags();
+            long newFlags;
 
-                boolean value = FlagsCalculator.isFlagSet(flags, PlayerFlags.valueOf(flagString));
-
-                if (value && Homestead.config.isFlagDisabled(flagString)) {
-                    long newFlags = FlagsCalculator.removeFlag(flags, PlayerFlags.valueOf(flagString));
-
-                    region.setPlayerFlags(newFlags);
-                }
+            if (state) {
+                newFlags = FlagsCalculator.addFlag(flags, flag);
+            } else {
+                newFlags = FlagsCalculator.removeFlag(flags, flag);
             }
+
+            region.setPlayerFlags(newFlags);
+        }
+    }
+
+    public static void setWorldFlagForAllRegions(long flag, boolean state) {
+        for (Region region : getAll()) {
+            long flags = region.getWorldFlags();
+            long newFlags;
+
+            if (state) {
+                newFlags = FlagsCalculator.addFlag(flags, flag);
+            } else {
+                newFlags = FlagsCalculator.removeFlag(flags, flag);
+            }
+
+            region.setWorldFlags(newFlags);
         }
     }
 }
