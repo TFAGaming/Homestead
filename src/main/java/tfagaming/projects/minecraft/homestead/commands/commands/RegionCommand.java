@@ -315,6 +315,12 @@ public class RegionCommand extends CommandBuilder {
                                     RegionsManager.getPublicRegions().stream().map(Region::getName).toList());
                         }
                     }
+                if (args.length == 3)
+                    if (Homestead.config.isWelcomeSignEnabled()) {
+                        for (int i = 0; i < RegionsManager.getPlayersWithRegionsHasWelcomeSigns().size(); i++) {
+                            suggestions.add(String.valueOf(i));
+                        }
+                    }
                 break;
             }
             case "subareas": {

@@ -159,7 +159,7 @@ prefix: "&8[&6HS&8]&r "
 134: "&7Your review have been submitted!"
 135: "&7Auto-claim session has started! Wonder around to claim unclaimed chunks."
 136: "&7Auto-claim session has successfully ended."
-
+137: "&cInvalid region index."
 
 logs:
   0: "&7Updated name from &2{oldname} &7to &2{newname}&7."

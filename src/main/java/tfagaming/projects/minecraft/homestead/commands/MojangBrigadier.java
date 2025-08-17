@@ -154,7 +154,9 @@ public class MojangBrigadier {
 								StringArgumentType.string())))
 				.then(LiteralArgumentBuilder.literal("visit")
 						.then(RequiredArgumentBuilder.argument("name",
-								StringArgumentType.string())))
+								StringArgumentType.string())
+								.then(RequiredArgumentBuilder.argument("index",
+										IntegerArgumentType.integer(0, 32767)))))
 				.then(LiteralArgumentBuilder.literal("withdraw")
 						.then(RequiredArgumentBuilder.argument("amount",
 								IntegerArgumentType.integer(0, 1000000000))))

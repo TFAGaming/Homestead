@@ -1,5 +1,6 @@
 package tfagaming.projects.minecraft.homestead.commands.commands.subcommands;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,6 +15,7 @@ import tfagaming.projects.minecraft.homestead.flags.PlayerFlags;
 import tfagaming.projects.minecraft.homestead.gui.menus.RegionsWithWelcomeSignsMenu;
 import tfagaming.projects.minecraft.homestead.managers.RegionsManager;
 import tfagaming.projects.minecraft.homestead.structure.Region;
+import tfagaming.projects.minecraft.homestead.tools.java.NumberUtils;
 import tfagaming.projects.minecraft.homestead.tools.minecraft.players.PlayerUtils;
 import tfagaming.projects.minecraft.homestead.tools.minecraft.teleportation.DelayedTeleport;
 
@@ -50,22 +52,30 @@ public class VisitRegionSubCmd extends SubCommandBuilder {
                 return true;
             }
 
-            List<Region> regions = RegionsManager.getRegionsOwnedByPlayer(target);
-            Region firstRegion = null;
+            String indexInput = args.length >= 3 ? args[2] : "0";
 
-            for (Region region : regions) {
-                if (region.getWelcomeSign() != null) {
-                    firstRegion = region;
-                    break;
-                }
-            }
-
-            if (firstRegion == null) {
-                PlayerUtils.sendMessage(player, 132);
+            if (!NumberUtils.isValidInteger(indexInput)) {
+                PlayerUtils.sendMessage(player, 137);
                 return true;
             }
 
-            new DelayedTeleport(player, firstRegion.getWelcomeSign().getBukkitLocation());
+            int index = Integer.parseInt(indexInput);
+
+            List<Region> regions = RegionsManager.getRegionsOwnedByPlayer(target);
+            List<Region> filteredRegions = new ArrayList<>();
+
+            for (Region region : regions) {
+                if (region.getWelcomeSign() != null) {
+                    filteredRegions.add(region);
+                }
+            }
+
+            if (filteredRegions.size() > 0 && (index < 0 || index > filteredRegions.size() - 1)) {
+                PlayerUtils.sendMessage(player, 137);
+                return true;
+            }
+
+            new DelayedTeleport(player, filteredRegions.get(index).getWelcomeSign().getBukkitLocation());
         } else {
             if (args.length < 2) {
                 PlayerUtils.sendMessage(player, 0);
