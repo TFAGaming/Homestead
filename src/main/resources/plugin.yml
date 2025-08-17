@@ -178,6 +178,8 @@ permissions:
     default: op
   homestead.commands.homesteadadmin.updates:
     default: op
+  homestead.commands.homesteadadmin.flagsoverride:
+    default: op
   homestead.commands.homesteadadmin.*:
     default: op
     children:
@@ -186,3 +188,4 @@ permissions:
       homestead.commands.homesteadadmin.plugin: true
       homestead.commands.homesteadadmin.reload: true
       homestead.commands.homesteadadmin.updates: true
+      homestead.commands.homesteadadmin.flagsoverride: true

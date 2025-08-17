@@ -195,6 +195,36 @@ public class MojangBrigadier {
 				.then(LiteralArgumentBuilder.literal("plugin"))
 				.then(LiteralArgumentBuilder.literal("reload"))
 				.then(LiteralArgumentBuilder.literal("updates"))
+				.then(LiteralArgumentBuilder.literal("flagsoverride")
+						.then(LiteralArgumentBuilder.literal("global")
+								.then(RequiredArgumentBuilder
+										.argument("flag", StringArgumentType
+												.string())
+										.then(RequiredArgumentBuilder.argument(
+												"state",
+												StringArgumentType
+														.string()))))
+						.then(LiteralArgumentBuilder.literal("member")
+								.then(RequiredArgumentBuilder
+										.argument("player", StringArgumentType
+												.string())
+										.then(RequiredArgumentBuilder
+												.argument("flag",
+														StringArgumentType
+																.string())
+												.then(RequiredArgumentBuilder
+														.argument(
+																"state",
+																StringArgumentType
+																		.string())))))
+						.then(LiteralArgumentBuilder.literal("world")
+								.then(RequiredArgumentBuilder
+										.argument("flag", StringArgumentType
+												.string())
+										.then(RequiredArgumentBuilder.argument(
+												"state",
+												StringArgumentType
+														.string())))))
 				.build();
 
 		PluginCommand homesteadAdminCommand = plugin.getCommand("homesteadadmin");
