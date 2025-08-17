@@ -1,6 +1,7 @@
 package tfagaming.projects.minecraft.homestead.commands.commands.subcommands;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.bukkit.OfflinePlayer;
@@ -92,6 +93,13 @@ public class FlagsSubCmd extends SubCommandBuilder {
                     return true;
                 }
 
+                List<String> disabledFlags = Homestead.config.get("disabled-flags");
+
+                if (disabledFlags.contains(flagInput)) {
+                    PlayerUtils.sendMessage(player, 42);
+                    return true;
+                }
+
                 long flags = region.getMember(target).getFlags();
                 long flag = PlayerFlags.valueOf(flagInput);
 
@@ -166,6 +174,13 @@ public class FlagsSubCmd extends SubCommandBuilder {
                     return true;
                 }
 
+                List<String> disabledFlags = Homestead.config.get("disabled-flags");
+
+                if (disabledFlags.contains(flagInput)) {
+                    PlayerUtils.sendMessage(player, 42);
+                    return true;
+                }
+
                 long flags = region.getPlayerFlags();
                 long flag = PlayerFlags.valueOf(flagInput);
 
@@ -236,6 +251,13 @@ public class FlagsSubCmd extends SubCommandBuilder {
 
                 if (!WorldFlags.getFlags().contains(flagInput)) {
                     PlayerUtils.sendMessage(player, 41);
+                    return true;
+                }
+
+                List<String> disabledFlags = Homestead.config.get("disabled-flags");
+
+                if (disabledFlags.contains(flagInput)) {
+                    PlayerUtils.sendMessage(player, 42);
                     return true;
                 }
 
