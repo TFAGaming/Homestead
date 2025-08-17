@@ -86,6 +86,8 @@ permissions:
       homestead.region.dynamicmaps.color: true
   homestead.commands.region.accept:
     default: true
+  homestead.commands.region.auto:
+    default: true
   homestead.commands.region.banlist:
     default: true
   homestead.commands.region.ban:
@@ -118,6 +120,8 @@ permissions:
     default: true
   homestead.commands.region.info:
     default: true
+  homestead.commands.region.rate:
+    default: true
   homestead.commands.region.rename:
     default: true
   homestead.commands.region.set:
@@ -138,6 +142,7 @@ permissions:
     default: true
     children:
       homestead.commands.region.accept: true
+      homestead.commands.region.auto: true
       homestead.commands.region.banlist: true
       homestead.commands.region.ban: true
       homestead.commands.region.claimlist: true
@@ -154,6 +159,7 @@ permissions:
       homestead.commands.region.player: true
       homestead.commands.region.borders: true
       homestead.commands.region.info: true
+      homestead.commands.region.rate: true
       homestead.commands.region.rename: true
       homestead.commands.region.set: true
       homestead.commands.region.subareas: true
