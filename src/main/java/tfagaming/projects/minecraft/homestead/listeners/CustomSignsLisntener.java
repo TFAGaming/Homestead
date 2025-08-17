@@ -137,6 +137,11 @@ public class CustomSignsLisntener implements Listener {
     }
 
     private boolean handleWelcomeSign(SignChangeEvent event, Player player, String[] lines) {
+        if (!Homestead.config.isWelcomeSignEnabled()) {
+            PlayerUtils.sendMessage(player, 105);
+            return true;
+        }
+
         if (lines.length < 4) {
             PlayerUtils.sendMessage(player, 120);
             return true;

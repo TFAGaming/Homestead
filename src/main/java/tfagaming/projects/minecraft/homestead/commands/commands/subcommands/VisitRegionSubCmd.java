@@ -70,6 +70,11 @@ public class VisitRegionSubCmd extends SubCommandBuilder {
                 }
             }
 
+            if (filteredRegions.size() == 0) {
+                PlayerUtils.sendMessage(player, 137);
+                return true;
+            }
+
             if (filteredRegions.size() > 0 && (index < 0 || index > filteredRegions.size() - 1)) {
                 PlayerUtils.sendMessage(player, 137);
                 return true;
