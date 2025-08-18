@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -71,6 +72,8 @@ public class TopBankRegionsMenu {
             } else if (event.isRightClick()) {
                 new TopRatingRegionsMenu(player);
             }
+
+            player.playSound(player.getLocation(), Sound.BLOCK_LEVER_CLICK, 500.0f, 1.0f);
         });
 
         gui.open(player, MenuUtils.getEmptySlot());
