@@ -8,6 +8,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import tfagaming.projects.minecraft.homestead.Homestead;
+import tfagaming.projects.minecraft.homestead.flags.RegionControlFlags;
 import tfagaming.projects.minecraft.homestead.gui.Menu;
 import tfagaming.projects.minecraft.homestead.managers.RegionsManager;
 import tfagaming.projects.minecraft.homestead.managers.RegionsManager.RegionSorting;
@@ -176,6 +177,11 @@ public class RegionMenu {
         ItemStack weatherAndTimeButton = MenuUtils.getButton(16, replacements);
 
         gui.addItem(16, weatherAndTimeButton, (_player, event) -> {
+            if (!PlayerUtils.hasControlRegionPermissionFlag(region.getUniqueId(), player,
+                    RegionControlFlags.SET_WEATHER_AND_TIME)) {
+                return;
+            }
+
             if (event.isLeftClick()) {
                 region.setWeather(WeatherType.next(region.getWeather()));
             } else if (event.isRightClick()) {

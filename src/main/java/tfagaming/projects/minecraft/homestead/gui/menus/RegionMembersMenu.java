@@ -76,6 +76,11 @@ public class RegionMembersMenu {
                                 return;
                             }
 
+                            if (!PlayerUtils.hasControlRegionPermissionFlag(region.getUniqueId(), player,
+                                    RegionControlFlags.UNTRUST_PLAYERS)) {
+                                return;
+                            }
+
                             region.removeMember(member.getBukkitOfflinePlayer());
 
                             Map<String, String> replacements = new HashMap<String, String>();

@@ -421,7 +421,7 @@ public class RegionProtectionListener implements Listener {
                         || material.equals(Material.LAVA_CAULDRON) || material.equals(Material.WATER_CAULDRON)
                         || material.equals(Material.LODESTONE) || material.name().contains("CAMPFIRE")
                         || material.equals(Material.RESPAWN_ANCHOR) || material.equals(Material.BEEHIVE)
-                        || material.equals(Material.BEE_NEST)) {
+                        || material.equals(Material.BEE_NEST) || material.equals(Material.HOPPER)) {
                     if (subArea != null) {
                         if (!player.getUniqueId().equals(region.getOwnerId())
                                 && !PlayerUtils.hasPermissionFlag(region.getUniqueId(), subArea.getId(), player,

@@ -62,6 +62,11 @@ public class RegionBannedPlayersMenu {
                                 return;
                             }
 
+                            if (!PlayerUtils.hasControlRegionPermissionFlag(region.getUniqueId(), player,
+                                    RegionControlFlags.UNBAN_PLAYERS)) {
+                                return;
+                            }
+
                             region.unbanPlayer(bannedPlayer.getBukkitOfflinePlayer());
 
                             Map<String, String> replacements = new HashMap<String, String>();

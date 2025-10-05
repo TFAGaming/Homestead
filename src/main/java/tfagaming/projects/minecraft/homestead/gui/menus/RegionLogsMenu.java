@@ -8,6 +8,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import tfagaming.projects.minecraft.homestead.Homestead;
+import tfagaming.projects.minecraft.homestead.flags.RegionControlFlags;
 import tfagaming.projects.minecraft.homestead.gui.PaginationMenu;
 import tfagaming.projects.minecraft.homestead.structure.Region;
 import tfagaming.projects.minecraft.homestead.structure.serializable.SerializableLog;
@@ -47,6 +48,11 @@ public class RegionLogsMenu {
                     new RegionMenu(player, region);
                 }, (_player, context) -> {
                     if (context.getIndex() >= logs.size()) {
+                        return;
+                    }
+
+                    if (!PlayerUtils.hasControlRegionPermissionFlag(region.getUniqueId(), player,
+                            RegionControlFlags.MANAGE_LOGS)) {
                         return;
                     }
 

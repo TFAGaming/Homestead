@@ -9,6 +9,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import tfagaming.projects.minecraft.homestead.Homestead;
+import tfagaming.projects.minecraft.homestead.flags.RegionControlFlags;
 import tfagaming.projects.minecraft.homestead.gui.PaginationMenu;
 import tfagaming.projects.minecraft.homestead.managers.ChunksManager;
 import tfagaming.projects.minecraft.homestead.particles.ChunkParticlesSpawner;
@@ -81,6 +82,11 @@ public class RegionClaimedChunksMenu {
                         if (ChunksManager.isChunkClaimed(chunk.getBukkitChunk())
                                 && ChunksManager.getRegionOwnsTheChunk(chunk.getBukkitChunk()).getUniqueId()
                                         .equals(region.getUniqueId())) {
+                            if (!PlayerUtils.hasControlRegionPermissionFlag(region.getUniqueId(), player,
+                                    RegionControlFlags.UNCLAIM_CHUNKS)) {
+                                return;
+                            }
+
                             ChunksManager.unclaimChunk(region.getUniqueId(), chunk.getBukkitChunk(), player);
 
                             Map<String, String> replacements = new HashMap<String, String>();

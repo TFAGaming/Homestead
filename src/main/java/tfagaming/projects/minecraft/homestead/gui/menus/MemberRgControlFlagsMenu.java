@@ -43,6 +43,10 @@ public class MemberRgControlFlagsMenu {
                         return;
                     }
 
+                    if (!region.getOwnerId().equals(player.getUniqueId())) {
+                        return;
+                    }
+
                     String flagString = RegionControlFlags.getFlags().get(context.getIndex());
 
                     List<String> disabledFlags = Homestead.config.get("disabled-flags");

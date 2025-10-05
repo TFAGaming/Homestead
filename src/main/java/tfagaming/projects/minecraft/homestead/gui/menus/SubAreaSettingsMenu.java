@@ -105,6 +105,11 @@ public class SubAreaSettingsMenu {
                 return;
             }
 
+            if (!PlayerUtils.hasControlRegionPermissionFlag(region.getUniqueId(), player,
+                    RegionControlFlags.MANAGE_SUBAREAS)) {
+                return;
+            }
+
             region.removeSubArea(subArea.getId());
 
             PlayerUtils.sendMessage(player, 62, replacements);

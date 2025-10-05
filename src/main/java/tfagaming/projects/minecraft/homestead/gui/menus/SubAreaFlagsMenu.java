@@ -14,6 +14,7 @@ import org.bukkit.inventory.ItemStack;
 import tfagaming.projects.minecraft.homestead.Homestead;
 import tfagaming.projects.minecraft.homestead.flags.FlagsCalculator;
 import tfagaming.projects.minecraft.homestead.flags.PlayerFlags;
+import tfagaming.projects.minecraft.homestead.flags.RegionControlFlags;
 import tfagaming.projects.minecraft.homestead.gui.PaginationMenu;
 import tfagaming.projects.minecraft.homestead.structure.Region;
 import tfagaming.projects.minecraft.homestead.structure.serializable.SerializableSubArea;
@@ -39,6 +40,11 @@ public class SubAreaFlagsMenu {
                     new SubAreaSettingsMenu(player, region, subArea);
                 }, (_player, context) -> {
                     if (cooldowns.contains(player.getUniqueId())) {
+                        return;
+                    }
+
+                    if (!PlayerUtils.hasControlRegionPermissionFlag(region.getUniqueId(), player,
+                            RegionControlFlags.MANAGE_SUBAREAS)) {
                         return;
                     }
 

@@ -13,6 +13,7 @@ import org.bukkit.inventory.ItemStack;
 
 import tfagaming.projects.minecraft.homestead.Homestead;
 import tfagaming.projects.minecraft.homestead.flags.FlagsCalculator;
+import tfagaming.projects.minecraft.homestead.flags.RegionControlFlags;
 import tfagaming.projects.minecraft.homestead.flags.WorldFlags;
 import tfagaming.projects.minecraft.homestead.gui.PaginationMenu;
 import tfagaming.projects.minecraft.homestead.structure.Region;
@@ -38,6 +39,11 @@ public class WorldFlagsMenu {
                     new RegionMenu(player, region);
                 }, (_player, context) -> {
                     if (cooldowns.contains(player.getUniqueId())) {
+                        return;
+                    }
+
+                    if (!PlayerUtils.hasControlRegionPermissionFlag(region.getUniqueId(), player,
+                            RegionControlFlags.SET_WORLD_FLAGS)) {
                         return;
                     }
 
