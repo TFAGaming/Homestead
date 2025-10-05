@@ -71,7 +71,7 @@ public class RegionIconTools {
 
             return bufferedImage;
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.warning("Failed to download the icon! URL: " + imageUrl);
             return null;
         }
     }
