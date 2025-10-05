@@ -383,8 +383,8 @@ public class RegionProtectionListener implements Listener {
                         || event.getItem().getType().name().contains("PAINTING")
                         || event.getItem().getType().name().contains("BONE_MEAL")) {
                     Region region = ChunksManager.getRegionOwnsTheChunk(chunk);
-                    SerializableSubArea subArea = region
-                            .findSubAreaHasLocationInside(event.getClickedBlock().getLocation());
+                    SerializableSubArea subArea = block == null ? null
+                            : region.findSubAreaHasLocationInside(block.getLocation());
 
                     if (subArea != null) {
                         if (!player.getUniqueId().equals(region.getOwnerId())
@@ -1978,7 +1978,8 @@ public class RegionProtectionListener implements Listener {
 
         if (entity != null) {
             if (ChunksManager.isChunkClaimed(chunk)) {
-                if (!(entity instanceof Player || entity instanceof Wither || entity instanceof Villager || entity instanceof Bee)
+                if (!(entity instanceof Player || entity instanceof Wither || entity instanceof Villager
+                        || entity instanceof Bee)
                         && entity instanceof Mob) {
                     Region region = ChunksManager.getRegionOwnsTheChunk(chunk);
 

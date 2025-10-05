@@ -16,7 +16,7 @@ public class UpdateChecker {
         try {
             Logger.info("Looking for updates on GitHub...");
 
-            URI uri = URI.create("https://raw.githubusercontent.com/TFAGaming/Homestead-Help/main/version.yml");
+            URI uri = URI.create("https://raw.githubusercontent.com/TFAGaming/Homestead/main/version.yml");
             URL url = uri.toURL();
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("GET");
