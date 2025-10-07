@@ -127,8 +127,10 @@ public class RegionMembersMenu {
                 Map<String, String> replacements = new HashMap<String, String>();
                 replacements.put("{playername}", targetPlayer.getName());
                 replacements.put("{region}", region.getName());
+                replacements.put("{ownername}", region.getOwner().getName());
 
                 PlayerUtils.sendMessage(player, 36, replacements);
+                PlayerUtils.sendMessage(targetPlayer.getPlayer(), 139, replacements);
 
                 RegionsManager.addNewLog(region.getUniqueId(), 2, replacements);
 
