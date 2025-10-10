@@ -1,15 +1,16 @@
 package tfagaming.projects.minecraft.homestead.integrations.maps;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.flowpowered.math.vector.Vector2i;
+import com.technicjelle.BMUtils.Cheese;
+import de.bluecolored.bluemap.api.markers.*;
 import org.bukkit.Location;
 import org.bukkit.World;
 
 import de.bluecolored.bluemap.api.BlueMapMap;
-import de.bluecolored.bluemap.api.markers.ExtrudeMarker;
-import de.bluecolored.bluemap.api.markers.MarkerSet;
-import de.bluecolored.bluemap.api.markers.POIMarker;
 import de.bluecolored.bluemap.api.math.Color;
 import de.bluecolored.bluemap.api.math.Shape;
 import tfagaming.projects.minecraft.homestead.Homestead;
@@ -123,31 +124,32 @@ public class BlueMapAPI {
                 : Homestead.config.get("dynamic-maps.chunks.color"))
                 : region.getMapColor();
 
-        World world = region.getChunks().get(0).getWorld();
-        MarkerSet markerSet = getOrNewMarkerSet(world);
 
-        int index = 0;
-        for (SerializableChunk chunk : region.getChunks()) {
-            double x1 = chunk.getX() * 16;
-            double z1 = chunk.getZ() * 16;
-            double x2 = x1 + 16;
-            double z2 = z1 + 16;
+        MarkerSet markerSet = getOrNewMarkerSet(region.getLocation().getWorld());
 
-            Shape shape = Shape.createRect(x1, z1, x2, z2);
-            String markerId = "region-" + region.getUniqueId() + "-chunk-" + index++;
+        Map<String, Marker> markers = markerSet.getMarkers();
 
-            ExtrudeMarker marker = ExtrudeMarker.builder()
-                    .label(plainLabel)
-                    .detail(hoverText)
+        Vector2i[] chunkCoordinates = region.getChunks().stream().map(chunk -> new Vector2i(chunk.getX(), chunk.getZ())).toArray(Vector2i[]::new);
+
+        Collection<Cheese> platter = Cheese.createPlatterFromChunks(chunkCoordinates);
+        int i = 0;
+        for (Cheese cheese : platter) {
+            ShapeMarker.Builder chunkMarkerBuilder = new ShapeMarker.Builder()
+                    .label(region.displayName)
+                    .lineColor(new Color(255, 70, 70))
+                    .lineWidth(2)
+                    .fillColor(new Color(200,70,70))
                     .depthTestEnabled(false)
-                    .shape(shape, -64, 320)
-                    .fillColor(new Color(chunkColor, 50))
-                    .lineColor(new Color(chunkColor, 255))
-                    .lineWidth(1)
+                    .shape(cheese.getShape(), (float) 90);
+            chunkMarkerBuilder.holes(cheese.getHoles().toArray(Shape[]::new));
+            ShapeMarker chunkMarker = chunkMarkerBuilder
+                    .centerPosition()
                     .build();
-
-            markerSet.getMarkers().put(markerId, marker);
+            markers.put("towny." + region.getName() + ".area." + i, chunkMarker);
+            i += 1;
         }
+
+
 
         addRegionSpawnLocation(markerSet, region, hoverText);
     }

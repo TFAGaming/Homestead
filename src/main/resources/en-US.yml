@@ -161,7 +161,7 @@ prefix: "&8[&6HS&8]&r "
 136: "&7Auto-claim session has successfully ended."
 137: "&cInvalid region index."
 138: "&7The player &3{playername} &7accepted your invite to the region &2{region}!"
-139: "&7{ownername}&7 has invited you to their region &2{region}&7! &7Type '&a/region accept &2{region}' &7to join."
+139: "&7{ownername}&7 has invited you to their region &2{region}&7! &7Type '&a/hs accept &2{region}' &7to join."
 140: "&cYou can only claim chunks that are next to your existing region!"
 141: "&cYou cannot unclaim this chunk because it would split your region!"
 

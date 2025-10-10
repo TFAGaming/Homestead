@@ -92,6 +92,11 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
+			<groupId>com.technicjelle</groupId>
+			<artifactId>BMUtils</artifactId>
+			<version>5.0.1</version>
+		</dependency>
+		<dependency>
 			<groupId>us.dynmap</groupId>
 			<artifactId>DynmapCoreAPI</artifactId>
 			<version>3.7-beta-6</version>
@@ -183,6 +188,27 @@
 				<plugin>
 					<artifactId>maven-deploy-plugin</artifactId>
 					<version>2.8.2</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-shade-plugin</artifactId>
+					<version>3.5.0</version>
+					<executions>
+						<execution>
+							<phase>package</phase>
+							<goals>
+								<goal>shade</goal>
+							</goals>
+							<configuration>
+								<relocations>
+									<relocation>
+										<pattern>com.technicjelle.BMUtils</pattern>
+										<shadedPattern>tfagaming.projects.minecraft.homestead.libs.BMUtils</shadedPattern>
+									</relocation>
+								</relocations>
+							</configuration>
+						</execution>
+					</executions>
 				</plugin>
 			</plugins>
 		</pluginManagement>
