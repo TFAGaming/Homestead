@@ -21,8 +21,8 @@ import tfagaming.projects.minecraft.homestead.tools.minecraft.chunks.ChunkUtils;
 import tfagaming.projects.minecraft.homestead.tools.minecraft.players.PlayerUtils;
 
 /**
- * Handles all logic related to claiming, unclaiming, and managing chunks in regions.
- * Includes adjacency enforcement, anti-split protection, and fault-tolerant data handling.
+ * Handles claiming, unclaiming, and managing chunks in regions.
+ * Includes adjacency enforcement, anti-split protection, and data handling.
  */
 public class ChunksManager {
 
@@ -31,7 +31,6 @@ public class ChunksManager {
         Region region = RegionsManager.findRegion(id);
         if (region == null) return;
 
-        // Prevent claiming isolated chunks (except the first)
         if (!region.getChunks().isEmpty() && !hasAdjacentOwnedChunk(region, chunk)) {
             if (player.length > 0 && player[0] instanceof Player target && target.isOnline()) {
                 PlayerUtils.sendMessage(target, 140);
@@ -45,14 +44,35 @@ public class ChunksManager {
         Homestead.getInstance().runSyncTask(() -> Bukkit.getPluginManager().callEvent(event));
     }
 
-    /** Unclaims a chunk from a region. Prevents removal if it would split the region. */
+    /**
+     * Unclaims a chunk with normal protection checks.
+     */
     public static void unclaimChunk(UUID id, Chunk chunk, OfflinePlayer... player) {
+        unclaimChunkInternal(id, chunk, player, false);
+    }
+
+    /**
+     * Unclaims a chunk bypassing split/topology protection and ownership checks.
+     */
+    public static void forceUnclaimChunk(UUID id, Chunk chunk, OfflinePlayer... player) {
+        unclaimChunkInternal(id, chunk, player, true);
+    }
+
+    /**
+     * Internal unclaim implementation with optional force bypass.
+     *
+     * @param id     region id
+     * @param chunk  bukkit chunk
+     * @param player optional executor
+     * @param force  when true, bypasses split/topology validation
+     */
+    private static void unclaimChunkInternal(UUID id, Chunk chunk, OfflinePlayer[] player, boolean force) {
         Region region = RegionsManager.findRegion(id);
         if (region == null) return;
 
         SerializableChunk target = new SerializableChunk(chunk);
 
-        if (wouldSplitRegion(region, target)) {
+        if (!force && wouldSplitRegion(region, target)) {
             if (player.length > 0 && player[0] instanceof Player p && p.isOnline()) {
                 PlayerUtils.sendMessage(p, 141);
             }
@@ -96,7 +116,6 @@ public class ChunksManager {
     public static boolean wouldSplitRegion(Region region, SerializableChunk chunkToRemove) {
         if (region == null || region.getChunks() == null || region.getChunks().isEmpty()) return false;
 
-        // Normalize and deduplicate chunks
         List<SerializableChunk> normalized = new ArrayList<>();
         for (SerializableChunk c : region.getChunks()) {
             if (c == null || c.getWorldName() == null || c.getWorldName().isBlank()) continue;
@@ -114,7 +133,6 @@ public class ChunksManager {
 
         if (chunks.isEmpty()) return false;
 
-        // BFS traversal using Set for correct connectivity check
         String worldName = chunks.get(0).getWorldName();
         Set<SerializableChunk> visited = new HashSet<>();
         Queue<SerializableChunk> queue = new LinkedList<>();
@@ -249,7 +267,7 @@ public class ChunksManager {
         return location.getChunk();
     }
 
-    /** Returns a center-ish, safe location inside the given chunk (overworld/end). */
+    /** Returns a safe location inside the given chunk (overworld/end). */
     public static Location getLocation(Player player, Chunk chunk) {
         Location loc = new Location(chunk.getWorld(), chunk.getX() * 16 + 8, 64, chunk.getZ() * 16 + 8);
         loc.setY(loc.getWorld().getHighestBlockYAt(loc) + 2);
@@ -258,7 +276,7 @@ public class ChunksManager {
         return loc;
     }
 
-    /** Returns a safe location for a SerializableChunk. Uses a Nether-safe finder if needed. */
+    /** Returns a safe location for a SerializableChunk. */
     public static Location getLocation(Player player, SerializableChunk chunk) {
         World world = chunk.getWorld();
         if (world == null) return null;
@@ -293,7 +311,7 @@ public class ChunksManager {
         return null;
     }
 
-    /** Removes a random chunk from the region (used by upkeep logic). */
+    /** Removes a random chunk from the region. */
     public static void removeRandomChunk(UUID id) {
         Region region = RegionsManager.findRegion(id);
         if (region == null) return;

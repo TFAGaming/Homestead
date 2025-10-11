@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>tfagaming.projects.minecraft.homestead</groupId>
@@ -63,93 +62,127 @@
 			<version>4.11</version>
 			<scope>test</scope>
 		</dependency>
+
 		<dependency>
 			<groupId>org.spigotmc</groupId>
 			<artifactId>spigot-api</artifactId>
 			<version>1.21-R0.1-SNAPSHOT</version>
 			<scope>provided</scope>
 		</dependency>
+
 		<dependency>
 			<groupId>com.github.MilkBowl</groupId>
 			<artifactId>VaultAPI</artifactId>
 			<version>1.7</version>
 			<scope>provided</scope>
 		</dependency>
+
 		<dependency>
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
 			<version>2.18.0</version>
 		</dependency>
+
 		<dependency>
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
 			<version>42.7.7</version>
 		</dependency>
+
 		<dependency>
 			<groupId>de.bluecolored</groupId>
 			<artifactId>bluemap-api</artifactId>
 			<version>2.7.6</version>
 			<scope>provided</scope>
 		</dependency>
+
+		<!-- BMUtils (Cheese) -->
 		<dependency>
 			<groupId>com.technicjelle</groupId>
 			<artifactId>BMUtils</artifactId>
 			<version>5.0.1</version>
+			<scope>compile</scope>
+			<exclusions>
+				<!-- Verhindert, dass flow-math transitiv mitgeschattet wird -->
+				<exclusion>
+					<groupId>com.flowpowered</groupId>
+					<artifactId>flow-math</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
+
+		<!-- FlowPowered Math: NICHT schatten, zur Laufzeit von BlueMap beziehen -->
+		<dependency>
+			<groupId>com.flowpowered</groupId>
+			<artifactId>flow-math</artifactId>
+			<version>1.0.3</version>
+			<scope>provided</scope>
+		</dependency>
+
 		<dependency>
 			<groupId>us.dynmap</groupId>
 			<artifactId>DynmapCoreAPI</artifactId>
 			<version>3.7-beta-6</version>
 			<scope>provided</scope>
 		</dependency>
+
 		<dependency>
 			<groupId>maven.modrinth</groupId>
 			<artifactId>pl3xmap</artifactId>
 			<version>1.21.4-512</version>
 			<scope>provided</scope>
 		</dependency>
+
 		<dependency>
 			<groupId>xyz.jpenilla</groupId>
 			<artifactId>squaremap-api</artifactId>
 			<version>1.3.4</version>
 			<scope>provided</scope>
 		</dependency>
+
 		<dependency>
 			<groupId>com.github.GriefPrevention</groupId>
 			<artifactId>GriefPrevention</artifactId>
 			<version>16.18.2</version>
 			<scope>provided</scope>
 		</dependency>
+
 		<dependency>
 			<groupId>biz.princeps</groupId>
 			<artifactId>landlord-api</artifactId>
 			<version>4.365</version>
 			<scope>provided</scope>
 		</dependency>
+
 		<dependency>
 			<groupId>com.cjburkey.claimchunk</groupId>
 			<artifactId>claimchunk</artifactId>
 			<version>0.0.25-FIX3</version>
 			<scope>provided</scope>
 		</dependency>
+
 		<dependency>
 			<groupId>me.clip</groupId>
 			<artifactId>placeholderapi</artifactId>
 			<version>2.11.6</version>
 			<scope>provided</scope>
 		</dependency>
+
+		<!-- Commodore: kompilieren & schatten -->
 		<dependency>
 			<groupId>me.lucko</groupId>
 			<artifactId>commodore</artifactId>
 			<version>2.2</version>
 			<scope>compile</scope>
 		</dependency>
+
 		<dependency>
 			<groupId>com.sk89q.worldedit</groupId>
 			<artifactId>worldedit-bukkit</artifactId>
 			<version>7.3.10</version>
 			<scope>provided</scope>
 		</dependency>
+
 		<dependency>
 			<groupId>com.sk89q.worldguard</groupId>
 			<artifactId>worldguard-bukkit</artifactId>
@@ -159,60 +192,8 @@
 	</dependencies>
 
 	<build>
-		<pluginManagement>
-			<plugins>
-				<plugin>
-					<artifactId>maven-clean-plugin</artifactId>
-					<version>3.1.0</version>
-				</plugin>
-				<plugin>
-					<artifactId>maven-resources-plugin</artifactId>
-					<version>3.0.2</version>
-				</plugin>
-				<plugin>
-					<artifactId>maven-compiler-plugin</artifactId>
-					<version>3.11.0</version>
-				</plugin>
-				<plugin>
-					<artifactId>maven-surefire-plugin</artifactId>
-					<version>2.22.1</version>
-				</plugin>
-				<plugin>
-					<artifactId>maven-jar-plugin</artifactId>
-					<version>3.0.2</version>
-				</plugin>
-				<plugin>
-					<artifactId>maven-install-plugin</artifactId>
-					<version>2.5.2</version>
-				</plugin>
-				<plugin>
-					<artifactId>maven-deploy-plugin</artifactId>
-					<version>2.8.2</version>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-shade-plugin</artifactId>
-					<version>3.5.0</version>
-					<executions>
-						<execution>
-							<phase>package</phase>
-							<goals>
-								<goal>shade</goal>
-							</goals>
-							<configuration>
-								<relocations>
-									<relocation>
-										<pattern>com.technicjelle.BMUtils</pattern>
-										<shadedPattern>tfagaming.projects.minecraft.homestead.libs.BMUtils</shadedPattern>
-									</relocation>
-								</relocations>
-							</configuration>
-						</execution>
-					</executions>
-				</plugin>
-			</plugins>
-		</pluginManagement>
 		<plugins>
+			<!-- Java 21 compiler -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
@@ -220,6 +201,48 @@
 				<configuration>
 					<release>21</release>
 				</configuration>
+			</plugin>
+
+			<!-- Shade -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-shade-plugin</artifactId>
+				<version>3.5.1</version>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>shade</goal>
+						</goals>
+						<configuration>
+							<createDependencyReducedPom>false</createDependencyReducedPom>
+							<minimizeJar>false</minimizeJar>
+
+							<artifactSet>
+								<includes>
+									<include>com.technicjelle:BMUtils</include>
+									<include>me.lucko:commodore</include>
+								</includes>
+								<excludes>
+									<!-- Sicherheitshalber: flow-math niemals mitschatten -->
+									<exclude>com.flowpowered:flow-math</exclude>
+								</excludes>
+							</artifactSet>
+
+							<relocations>
+								<relocation>
+									<pattern>com.technicjelle.BMUtils</pattern>
+									<shadedPattern>tfagaming.projects.minecraft.homestead.libs.bmutils</shadedPattern>
+								</relocation>
+								<relocation>
+									<pattern>me.lucko.commodore</pattern>
+									<shadedPattern>tfagaming.projects.minecraft.homestead.libs.commodore</shadedPattern>
+								</relocation>
+								<!-- KEINE relocation von com.flowpowered.* -->
+							</relocations>
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>
