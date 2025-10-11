@@ -4,7 +4,7 @@ version: 4.0.4
 description: 'The Ultimate and Premium-Free Grief Prevention Plugin.'
 author: TFAGaming
 api-version: 1.21
-softdepend: [Vault]
+softdepend: [Vault, BlueMap]
 commands:
   claim:
     description: 'Claim a chunk'
@@ -31,6 +31,13 @@ commands:
     permission: homestead.commands.homesteadadmin
     aliases:
       - hsadmin
+    default: op
+  forceunclaim:
+    description:
+      OP-only: Unclaim the Chunk you are stay on, dont care if it is yours or not.
+    usage: /forceunclaim
+    aliases: [ opunclaim, adminunclaim ]
+    permission: homestead.admin.forceunclaim
     default: op
 permissions:
   homestead.region.create:

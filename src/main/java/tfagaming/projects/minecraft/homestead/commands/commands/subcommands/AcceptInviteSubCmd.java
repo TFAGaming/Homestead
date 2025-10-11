@@ -59,8 +59,10 @@ public class AcceptInviteSubCmd extends SubCommandBuilder {
 
         Map<String, String> replacements = new HashMap<String, String>();
         replacements.put("{region}", region.getName());
+        replacements.put("{playername}", player.getName());
 
         PlayerUtils.sendMessage(player, 46, replacements);
+        PlayerUtils.sendMessage(region.getOwner().getPlayer(), 138, replacements);
 
         return true;
     }

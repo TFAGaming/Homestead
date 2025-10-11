@@ -46,7 +46,6 @@ public class Homestead extends JavaPlugin {
 		Homestead.instance = this;
 		Homestead.startedAt = System.currentTimeMillis();
 
-		// Preparing data folder and default regions folder
 		if (!getDataFolder().exists()) {
 			getDataFolder().mkdirs();
 		}
@@ -56,10 +55,8 @@ public class Homestead extends JavaPlugin {
 			regionsFolder.mkdir();
 		}
 
-		// Preparing logging
 		new Logger();
 
-		// Loading configuration and language file
 		saveDefaultConfig();
 
 		config = new ConfigLoader(this);
@@ -112,10 +109,8 @@ public class Homestead extends JavaPlugin {
 			}
 		}
 
-		// Preparing cache
 		Homestead.cache = new RegionsCache(config.get("cache-interval"));
 
-		// Database
 		Database.Provider provider = Database.parseProviderFromString(config.get("database.provider"));
 
 		if (provider == null) {
@@ -134,7 +129,6 @@ public class Homestead extends JavaPlugin {
 			Logger.warning("Imported " + __a + " regions, deleting the \"claims\" folder...");
 
 			if (!OldDataLoader.deleteDirectory(claimsFolder)) {
-				// 100 times so they can notice it
 				for (int i = 0; i < 100; i++) {
 					Logger.error("Unable to delete the \"claims\" folder, please delete it manually.");
 				}
@@ -151,35 +145,32 @@ public class Homestead extends JavaPlugin {
 			database.importRegions();
 		}
 
-		// Integrations
 		if (!IntegrationsUtils.isVaultInstalled()) {
-			Logger.error(
-					"Unable to start the plugin; Plugin \"Vault\" is required to be installed, closing plugin's instance...");
+			Logger.error("Unable to start the plugin; \"Vault\" is required. Shutting down plugin instance...");
 			endInstance();
 			return;
 		} else {
-			Logger.info("Plugin \"Vault\" was found, loading service providers...");
+			Logger.info("\"Vault\" found, loading service providers...");
 		}
 
 		Homestead.vault = new Vault(this);
 
 		if (!Homestead.vault.setupEconomy()) {
-			Logger.warning("Unable to find a service provider for Economy.");
-			Logger.warning("Any feature that requires Economy's service will be skipped.");
+			Logger.warning("No Economy service provider found.");
+			Logger.warning("Any feature requiring an Economy service will be skipped.");
 		} else {
 			Logger.info("Loaded service provider: Economy [" + Homestead.vault.getEconomy().getName() + "]");
 		}
 
 		if (!Homestead.vault.setupPermissions()) {
-			Logger.error("Unable to find a service provider for Permissions.");
-			Logger.error("The plugin will close its instance, since Permissions is required for Homestead to run.");
+			Logger.error("No Permissions service provider found.");
+			Logger.error("Permissions are required for Homestead to run. Shutting down plugin instance...");
 			endInstance();
 			return;
 		} else {
 			Logger.info("Loaded service provider: Permissions [" + Homestead.vault.getPermissions().getName() + "]");
 		}
 
-		// Rest
 		registerCommands();
 		registerEvents();
 		registerBrigadier();
@@ -187,16 +178,14 @@ public class Homestead extends JavaPlugin {
 		new bStats(this);
 
 		if (Homestead.config.isDebugEnabled()) {
-            Logger.warning("Debug mode is enabled in config.yml, the file logs.txt may be flooded with warnings.");
-        }
+			Logger.warning("Debug mode is enabled in config.yml; logs.txt may be flooded with warnings.");
+		}
 
-		Logger.info("Ready, took " + String.valueOf(System.currentTimeMillis() - startedAt) + " milliseconds to load.");
+		Logger.info("Ready, took " + String.valueOf(System.currentTimeMillis() - startedAt) + " ms to load.");
 
 		runAsyncTask(() -> {
 			Logger.warning("Downloading required web map render icons... This may take a while!");
-
 			RegionIconTools.downloadAllIcons();
-
 			Logger.info("Successfully downloaded all icons.");
 		});
 
@@ -209,28 +198,30 @@ public class Homestead extends JavaPlugin {
 		if (Homestead.vault.isEconomyReady() && (boolean) Homestead.config.get("taxes.enabled")) {
 			runAsyncTimerTask(() -> {
 				new MemberTaxes(this);
-			}, 10); // 10 seconds
+			}, 10);
 		}
 
 		if (Homestead.vault.isEconomyReady() && (boolean) Homestead.config.get("upkeep.enabled")) {
 			runAsyncTimerTask(() -> {
 				new RegionUpkeep(this);
-			}, 10); // 10 seconds
+			}, 10);
 		}
 
 		if (Homestead.vault.isEconomyReady() && (boolean) Homestead.config.get("renting.enabled")) {
 			runAsyncTimerTask(() -> {
 				new RegionRent(this);
-			}, 10); // 10 seconds
+			}, 10);
 		}
 
 		runAsyncTimerTask(() -> {
 			runAsyncTask(() -> {
 				new UpdateChecker(this);
 			});
-		}, 86400); // 24 hours
+		}, 86400);
 
 		registerExternalPlugins();
+
+		initOptionalBlueMapIntegration();
 	}
 
 	private void registerCommands() {
@@ -238,6 +229,7 @@ public class Homestead extends JavaPlugin {
 		CommandBuilder.register(new ClaimCommand());
 		CommandBuilder.register(new UnclaimCommand());
 		CommandBuilder.register(new HomesteadAdminCommand());
+		CommandBuilder.register(new ForceUnclaimCommand());
 	}
 
 	private void registerEvents() {
@@ -253,19 +245,50 @@ public class Homestead extends JavaPlugin {
 		try {
 			if (CommodoreProvider.isSupported()) {
 				Commodore commodore = CommodoreProvider.getCommodore(this);
-
 				new MojangBrigadier(this, commodore);
 			} else {
-				Logger.warning("Mojang Brigadier is not supported with this server software.");
+				Logger.warning("Mojang Brigadier is not supported on this server software.");
 			}
 		} catch (NoClassDefFoundError e) {
+			Logger.warning("Commodore/Brigadier classes not present. Skipping Brigadier command registration.");
+		}
+	}
 
+	/**
+	 * Optionally initialize BlueMap integration when BlueMap is installed and the API is present.
+	 * Uses a defensive classpath check to avoid NoClassDefFoundError when BlueMap is absent.
+	 */
+	private void initOptionalBlueMapIntegration() {
+		try {
+			boolean enabled = getServer().getPluginManager().isPluginEnabled("BlueMap");
+			if (!enabled) {
+				Logger.info("[Maps] BlueMap is not installed — skipping BlueMap integration.");
+				return;
+			}
+
+			Class.forName("de.bluecolored.bluemap.api.BlueMapAPI");
+
+			de.bluecolored.bluemap.api.BlueMapAPI.onEnable(api -> {
+				try {
+					Logger.info("[Maps] BlueMap detected — enabling BlueMap integration.");
+					new tfagaming.projects.minecraft.homestead.integrations.maps.BlueMapAPI(this, api);
+				} catch (Throwable t) {
+					Logger.error("[Maps] Failed to initialize BlueMap integration: " + t.getClass().getName() + ": " + t.getMessage());
+				}
+			});
+
+			Logger.info("[Maps] BlueMap API hook registered.");
+
+		} catch (ClassNotFoundException e) {
+			Logger.info("[Maps] BlueMap API is not on the classpath — skipping BlueMap integration.");
+		} catch (Throwable t) {
+			Logger.error("[Maps] Unexpected error while setting up BlueMap integration: " + t.getClass().getName() + ": " + t.getMessage());
 		}
 	}
 
 	/**
 	 * Run a repeating task asynchronously with interval in seconds.
-	 * 
+	 *
 	 * @param callable The task to run.
 	 * @param interval The interval, in seconds.
 	 */
@@ -276,9 +299,8 @@ public class Homestead extends JavaPlugin {
 	}
 
 	/**
-	 * Run a repeating task asynchronously with interval in seconds, with a delay in
-	 * seconds.
-	 * 
+	 * Run a repeating task asynchronously with interval in seconds, with a delay in seconds.
+	 *
 	 * @param callable The task to run.
 	 * @param interval The interval, in seconds.
 	 */
@@ -291,7 +313,7 @@ public class Homestead extends JavaPlugin {
 
 	/**
 	 * Run a task asynchronously after a delay in seconds.
-	 * 
+	 *
 	 * @param callable The task to run.
 	 * @param delay    The delay, in seconds.
 	 */
@@ -303,7 +325,7 @@ public class Homestead extends JavaPlugin {
 
 	/**
 	 * Run a task asynchronously.
-	 * 
+	 *
 	 * @param callable The task to run.
 	 */
 	public void runAsyncTask(Runnable callable) {
@@ -312,7 +334,7 @@ public class Homestead extends JavaPlugin {
 
 	/**
 	 * Run a task synchronously.
-	 * 
+	 *
 	 * @param callable The task to run.
 	 */
 	public void runSyncTask(Runnable callable) {
@@ -330,7 +352,7 @@ public class Homestead extends JavaPlugin {
 
 	/**
 	 * Get an offline player with player unique IDs, using safe method.
-	 * 
+	 *
 	 * @param playerId The player ID.
 	 */
 	public OfflinePlayer getOfflinePlayerSync(UUID playerId) {
@@ -353,7 +375,7 @@ public class Homestead extends JavaPlugin {
 
 	/**
 	 * Get an offline player with player name, using safe method.
-	 * 
+	 *
 	 * @param playerName The player name.
 	 */
 	public OfflinePlayer getOfflinePlayerSync(String playerName) {
@@ -376,8 +398,7 @@ public class Homestead extends JavaPlugin {
 
 	public void onDisable() {
 		if (database != null) {
-			Logger.info("Closing database's connection...");
-
+			Logger.info("Closing database connection...");
 			database.closeConnection();
 		}
 	}
@@ -395,7 +416,7 @@ public class Homestead extends JavaPlugin {
 			boolean placeholderRegistered = new PlaceholderAPI(this).register();
 
 			if (!placeholderRegistered) {
-				Logger.error("Failed to registrer hooks.");
+				Logger.error("Failed to register hooks.");
 			}
 		}
 	}
