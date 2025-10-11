@@ -100,8 +100,11 @@ public class TrustPlayerSubCmd extends SubCommandBuilder {
         Map<String, String> replacements = new HashMap<String, String>();
         replacements.put("{playername}", target.getName());
         replacements.put("{region}", region.getName());
+        replacements.put("{ownername}", region.getOwner().getName());
 
         PlayerUtils.sendMessage(player, 36, replacements);
+        PlayerUtils.sendMessage(target.getPlayer(), 139, replacements);
+
 
         RegionsManager.addNewLog(region.getUniqueId(), 2, replacements);
 

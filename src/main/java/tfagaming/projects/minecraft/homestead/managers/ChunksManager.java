@@ -1,10 +1,6 @@
 package tfagaming.projects.minecraft.homestead.managers;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-import java.util.UUID;
-
+import java.util.*;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
@@ -15,17 +11,30 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 
 import tfagaming.projects.minecraft.homestead.Homestead;
-import tfagaming.projects.minecraft.homestead.api.events.*;
+import tfagaming.projects.minecraft.homestead.api.events.ChunkClaimEvent;
+import tfagaming.projects.minecraft.homestead.api.events.ChunkUnclaimEvent;
 import tfagaming.projects.minecraft.homestead.integrations.WorldEditAPI;
 import tfagaming.projects.minecraft.homestead.structure.Region;
-import tfagaming.projects.minecraft.homestead.structure.serializable.*;
+import tfagaming.projects.minecraft.homestead.structure.serializable.SerializableChunk;
+import tfagaming.projects.minecraft.homestead.structure.serializable.SerializableSubArea;
 import tfagaming.projects.minecraft.homestead.tools.minecraft.chunks.ChunkUtils;
+import tfagaming.projects.minecraft.homestead.tools.minecraft.players.PlayerUtils;
 
+/**
+ * Handles claiming, unclaiming, and managing chunks in regions.
+ * Includes adjacency enforcement, anti-split protection, and data handling.
+ */
 public class ChunksManager {
+
+    /** Claims a chunk for a specific region. */
     public static void claimChunk(UUID id, Chunk chunk, OfflinePlayer... player) {
         Region region = RegionsManager.findRegion(id);
+        if (region == null) return;
 
-        if (region == null) {
+        if (!region.getChunks().isEmpty() && !hasAdjacentOwnedChunk(region, chunk)) {
+            if (player.length > 0 && player[0] instanceof Player target && target.isOnline()) {
+                PlayerUtils.sendMessage(target, 140);
+            }
             return;
         }
 
@@ -35,249 +44,303 @@ public class ChunksManager {
         Homestead.getInstance().runSyncTask(() -> Bukkit.getPluginManager().callEvent(event));
     }
 
+    /**
+     * Unclaims a chunk with normal protection checks.
+     */
     public static void unclaimChunk(UUID id, Chunk chunk, OfflinePlayer... player) {
-        removeChunk(id, new SerializableChunk(chunk));
+        unclaimChunkInternal(id, chunk, player, false);
+    }
 
-        boolean isRegeneratingChunksEnabled = Homestead.config.get("worldedit.regenerate-chunks");
+    /**
+     * Unclaims a chunk bypassing split/topology protection and ownership checks.
+     */
+    public static void forceUnclaimChunk(UUID id, Chunk chunk, OfflinePlayer... player) {
+        unclaimChunkInternal(id, chunk, player, true);
+    }
 
-        if (isRegeneratingChunksEnabled) {
-            Homestead.getInstance().runAsyncTask(() -> {
-                WorldEditAPI.regenerateChunk(chunk.getWorld(), chunk.getX(), chunk.getZ());
-            });
+    /**
+     * Internal unclaim implementation with optional force bypass.
+     *
+     * @param id     region id
+     * @param chunk  bukkit chunk
+     * @param player optional executor
+     * @param force  when true, bypasses split/topology validation
+     */
+    private static void unclaimChunkInternal(UUID id, Chunk chunk, OfflinePlayer[] player, boolean force) {
+        Region region = RegionsManager.findRegion(id);
+        if (region == null) return;
+
+        SerializableChunk target = new SerializableChunk(chunk);
+
+        if (!force && wouldSplitRegion(region, target)) {
+            if (player.length > 0 && player[0] instanceof Player p && p.isOnline()) {
+                PlayerUtils.sendMessage(p, 141);
+            }
+            return;
+        }
+
+        removeChunk(id, target);
+
+        boolean regenerate = Homestead.config.get("worldedit.regenerate-chunks");
+        if (regenerate) {
+            Homestead.getInstance().runAsyncTask(() ->
+                    WorldEditAPI.regenerateChunk(chunk.getWorld(), chunk.getX(), chunk.getZ())
+            );
         }
 
         ChunkUnclaimEvent event = new ChunkUnclaimEvent(chunk, player.length > 0 ? player[0] : null);
         Homestead.getInstance().runSyncTask(() -> Bukkit.getPluginManager().callEvent(event));
     }
 
+    /** Removes a claimed chunk from a region and its sub-areas. */
     public static void removeChunk(UUID id, SerializableChunk chunk) {
         Region region = RegionsManager.findRegion(id);
-
-        if (region == null) {
-            return;
-        }
+        if (region == null) return;
 
         region.removeChunk(chunk);
 
-        for (SerializableSubArea subArea : region.getSubAreas()) {
-            for (Chunk subAreaChunk : ChunkUtils.getChunksInArea(subArea.getFirstPoint(), subArea.getSecondPoint())) {
-                if (new SerializableChunk(subAreaChunk).toString(true).equals(chunk.toString(true))) {
-                    region.removeSubArea(subArea.getId());
+        for (SerializableSubArea sub : region.getSubAreas()) {
+            for (Chunk subChunk : ChunkUtils.getChunksInArea(sub.getFirstPoint(), sub.getSecondPoint())) {
+                if (new SerializableChunk(subChunk).toString(true).equals(chunk.toString(true))) {
+                    region.removeSubArea(sub.getId());
                     break;
                 }
             }
         }
     }
 
+    /**
+     * Determines whether removing the specified chunk would split the region
+     * into multiple disconnected areas.
+     */
+    public static boolean wouldSplitRegion(Region region, SerializableChunk chunkToRemove) {
+        if (region == null || region.getChunks() == null || region.getChunks().isEmpty()) return false;
+
+        List<SerializableChunk> normalized = new ArrayList<>();
+        for (SerializableChunk c : region.getChunks()) {
+            if (c == null || c.getWorldName() == null || c.getWorldName().isBlank()) continue;
+            c.setWorldName(c.getWorldName().trim());
+            normalized.add(c);
+        }
+
+        Map<String, SerializableChunk> byKey = new LinkedHashMap<>();
+        for (SerializableChunk c : normalized) {
+            byKey.putIfAbsent(c.toString(true), c);
+        }
+
+        List<SerializableChunk> chunks = new ArrayList<>(byKey.values());
+        chunks.removeIf(c -> c.toString(true).equals(chunkToRemove.toString(true)));
+
+        if (chunks.isEmpty()) return false;
+
+        String worldName = chunks.get(0).getWorldName();
+        Set<SerializableChunk> visited = new HashSet<>();
+        Queue<SerializableChunk> queue = new LinkedList<>();
+
+        queue.add(chunks.get(0));
+        visited.add(chunks.get(0));
+
+        while (!queue.isEmpty()) {
+            SerializableChunk current = queue.poll();
+
+            for (SerializableChunk neighbor : chunks) {
+                if (neighbor == null) continue;
+                if (!neighbor.getWorldName().equals(worldName)) continue;
+                if (visited.contains(neighbor)) continue;
+
+                if (areAdjacent(current, neighbor)) {
+                    visited.add(neighbor);
+                    queue.add(neighbor);
+                }
+            }
+        }
+
+        return visited.size() != chunks.size();
+    }
+
+    /** Returns whether two chunks are directly adjacent (N, S, E, W) in the same world. */
+    private static boolean areAdjacent(SerializableChunk a, SerializableChunk b) {
+        if (!a.getWorldName().equals(b.getWorldName())) return false;
+        int dx = Math.abs(a.getX() - b.getX());
+        int dz = Math.abs(a.getZ() - b.getZ());
+        return (dx == 1 && dz == 0) || (dx == 0 && dz == 1);
+    }
+
+    /** Returns whether the chunk's world is disabled. */
     public static boolean isChunkInDisabledWorld(Chunk chunk) {
         List<String> disabledWorlds = Homestead.config.get("disabled-worlds");
-
         return disabledWorlds.contains(chunk.getWorld().getName());
     }
 
+    /** Returns whether a given chunk is already claimed by any region. */
     public static boolean isChunkClaimed(Chunk chunk) {
+        String key = SerializableChunk.convertToString(chunk, true);
         for (Region region : RegionsManager.getAll()) {
-            for (SerializableChunk serializedChunk : region.getChunks()) {
-                String chunkString = SerializableChunk.convertToString(chunk, true);
-
-                if (serializedChunk.toString(true).equals(chunkString)) {
-                    return true;
-                }
+            for (SerializableChunk serialized : region.getChunks()) {
+                if (serialized == null) continue;
+                if (serialized.toString(true).equals(key)) return true;
             }
         }
-
         return false;
     }
 
+    /** Returns the region that owns a given chunk, or null if it is unclaimed. */
     public static Region getRegionOwnsTheChunk(Chunk chunk) {
+        String key = SerializableChunk.convertToString(chunk, true);
         for (Region region : RegionsManager.getAll()) {
-            for (SerializableChunk serializedChunk : region.getChunks()) {
-                String chunkString = SerializableChunk.convertToString(chunk, true);
-
-                if (serializedChunk.toString(true).equals(chunkString)) {
-                    return region;
-                }
+            for (SerializableChunk serialized : region.getChunks()) {
+                if (serialized == null) continue;
+                if (serialized.toString(true).equals(key)) return region;
             }
         }
-
         return null;
     }
 
+    /** Returns true if the provided chunk is adjacent to any chunk owned by the same region. */
+    public static boolean hasAdjacentOwnedChunk(Region region, Chunk chunk) {
+        World world = chunk.getWorld();
+        int x = chunk.getX();
+        int z = chunk.getZ();
+
+        int[][] dirs = {{x + 1, z}, {x - 1, z}, {x, z + 1}, {x, z - 1}};
+        for (int[] dir : dirs) {
+            int nx = dir[0], nz = dir[1];
+            if (!world.isChunkLoaded(nx, nz)) continue;
+
+            Chunk neighbor = world.getChunkAt(nx, nz);
+            Region neighborRegion = getRegionOwnsTheChunk(neighbor);
+            if (neighborRegion != null && neighborRegion.getUniqueId().equals(region.getUniqueId())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /** Finds a nearby unclaimed chunk around the player's current chunk within a radius up to 30. */
     public static Chunk findNearbyUnclaimedChunk(Player player) {
-        Chunk startChunk = player.getLocation().getChunk();
+        Chunk start = player.getLocation().getChunk();
         World world = player.getWorld();
-        int startX = startChunk.getX();
-        int startZ = startChunk.getZ();
+        int sx = start.getX(), sz = start.getZ();
 
-        int radius = 1;
-        int maxRadius = 30;
-
-        while (radius <= maxRadius) {
+        for (int radius = 1; radius <= 30; radius++) {
             for (int x = -radius; x <= radius; x++) {
                 for (int z = -radius; z <= radius; z++) {
-                    if (Math.abs(x) != radius && Math.abs(z) != radius) {
-                        continue;
-                    }
+                    if (Math.abs(x) != radius && Math.abs(z) != radius) continue;
+                    if (!world.isChunkLoaded(sx + x, sz + z)) continue;
 
-                    Chunk currentChunk = world.getChunkAt(startX + x, startZ + z);
-
-                    if (!ChunksManager.isChunkClaimed(currentChunk)) {
-                        return currentChunk;
-                    }
+                    Chunk current = world.getChunkAt(sx + x, sz + z);
+                    if (!isChunkClaimed(current)) return current;
                 }
             }
-            radius++;
         }
-
         return null;
     }
 
+    /** Returns true if the player has any neighboring claimed chunks that belong to another region. */
     public static boolean hasNeighbor(Player player) {
         Chunk chunk = player.getLocation().getChunk();
         World world = player.getWorld();
         int x = chunk.getX();
         int z = chunk.getZ();
 
-        Chunk north = world.getChunkAt(x, z - 1);
-        Chunk south = world.getChunkAt(x, z + 1);
-        Chunk west = world.getChunkAt(x - 1, z);
-        Chunk east = world.getChunkAt(x + 1, z);
+        Chunk[] neighbors = {
+                world.getChunkAt(x, z - 1),
+                world.getChunkAt(x, z + 1),
+                world.getChunkAt(x - 1, z),
+                world.getChunkAt(x + 1, z)
+        };
 
-        if (isChunkClaimed(north)) {
-            Region region = getRegionOwnsTheChunk(north);
-
-            if (!region.getOwnerId().equals(player.getUniqueId())) {
-                return true;
+        for (Chunk neighbor : neighbors) {
+            if (isChunkClaimed(neighbor)) {
+                Region r = getRegionOwnsTheChunk(neighbor);
+                if (r != null && !r.getOwnerId().equals(player.getUniqueId())) {
+                    return true;
+                }
             }
         }
-
-        if (isChunkClaimed(south)) {
-            Region region = getRegionOwnsTheChunk(south);
-
-            if (!region.getOwnerId().equals(player.getUniqueId())) {
-                return true;
-            }
-        }
-
-        if (isChunkClaimed(west)) {
-            Region region = getRegionOwnsTheChunk(west);
-
-            if (!region.getOwnerId().equals(player.getUniqueId())) {
-                return true;
-            }
-        }
-
-        if (isChunkClaimed(east)) {
-            Region region = getRegionOwnsTheChunk(east);
-
-            if (!region.getOwnerId().equals(player.getUniqueId())) {
-                return true;
-            }
-        }
-
         return false;
     }
 
+    /** Returns the chunk object for the given world and chunk coordinates. */
     public static Chunk getFromLocation(World world, int x, int z) {
-        Location location = new Location(world, x * 16 + 8, 64,
-                z * 16 + 8);
-
+        Location location = new Location(world, x * 16 + 8, 64, z * 16 + 8);
         return location.getChunk();
     }
 
+    /** Returns a safe location inside the given chunk (overworld/end). */
     public static Location getLocation(Player player, Chunk chunk) {
-        Location location = new Location(chunk.getWorld(), chunk.getX() * 16 + 8, 64,
-                chunk.getZ() * 16 + 8);
-
-        location.setY(location.getWorld().getHighestBlockYAt(location) + 2);
-        location.setPitch(player.getLocation().getPitch());
-        location.setYaw(player.getLocation().getYaw());
-
-        return location;
+        Location loc = new Location(chunk.getWorld(), chunk.getX() * 16 + 8, 64, chunk.getZ() * 16 + 8);
+        loc.setY(loc.getWorld().getHighestBlockYAt(loc) + 2);
+        loc.setPitch(player.getLocation().getPitch());
+        loc.setYaw(player.getLocation().getYaw());
+        return loc;
     }
 
+    /** Returns a safe location for a SerializableChunk. */
     public static Location getLocation(Player player, SerializableChunk chunk) {
         World world = chunk.getWorld();
+        if (world == null) return null;
+
         int x = chunk.getX() * 16 + 8;
         int z = chunk.getZ() * 16 + 8;
 
-        if (world == null) {
-            return null;
-        }
-
-        Location location;
-
+        Location loc;
         if (world.getEnvironment() == World.Environment.NETHER) {
-            location = findSafeNetherLocation(world, x, z);
+            loc = findSafeNetherLocation(world, x, z);
         } else {
-            int highestY = world.getHighestBlockYAt(x, z);
-            location = new Location(world, x, highestY + 2, z);
+            int highest = world.getHighestBlockYAt(x, z);
+            loc = new Location(world, x, highest + 2, z);
         }
 
-        if (location != null) {
-            location.setPitch(player.getLocation().getPitch());
-            location.setYaw(player.getLocation().getYaw());
+        if (loc != null) {
+            loc.setPitch(player.getLocation().getPitch());
+            loc.setYaw(player.getLocation().getYaw());
         }
-
-        return location;
+        return loc;
     }
 
+    /** Finds a safe standable location in the Nether near (x, z). */
     private static Location findSafeNetherLocation(World world, int x, int z) {
-        int minY = 32;
-        int maxY = 127;
-
-        for (int y = minY; y < maxY; y++) {
+        for (int y = 32; y < 127; y++) {
             Block block = world.getBlockAt(x, y, z);
             Block above = world.getBlockAt(x, y + 1, z);
-
             if (block.getType() == Material.AIR && above.getType() == Material.AIR) {
                 return new Location(world, x + 0.5, y, z + 0.5);
             }
         }
-
         return null;
     }
 
+    /** Removes a random chunk from the region. */
     public static void removeRandomChunk(UUID id) {
         Region region = RegionsManager.findRegion(id);
-
-        if (region == null) {
-            return;
-        }
+        if (region == null) return;
 
         List<SerializableChunk> chunks = region.getChunks();
+        if (chunks == null || chunks.isEmpty()) return;
 
-        if (chunks.size() > 0) {
-            Random random = new Random();
-            int randomIndex = random.nextInt(chunks.size());
-
-            region.removeChunk(chunks.get(randomIndex));
-        }
+        int index = new Random().nextInt(chunks.size());
+        region.removeChunk(chunks.get(index));
     }
 
+    /** Removes chunks belonging to worlds that no longer exist on the server. */
     public static int deleteInvalidChunks() {
         int count = 0;
-
-        List<String> worlds = new ArrayList<String>();
-
-        for (World world : Bukkit.getWorlds()) {
-            worlds.add(world.getName());
-        }
+        Set<String> worlds = new HashSet<>();
+        for (World w : Bukkit.getWorlds()) worlds.add(w.getName());
 
         for (Region region : RegionsManager.getAll()) {
-            if (region == null || region.getChunks().size() == 0) {
-                continue;
-            }
+            if (region == null || region.getChunks() == null || region.getChunks().isEmpty()) continue;
 
-            for (SerializableChunk serializedChunk : region.getChunks()) {
-                if (!worlds.contains(serializedChunk.getWorldName())) {
-                    region.removeChunk(serializedChunk);
-
+            Iterator<SerializableChunk> it = region.getChunks().iterator();
+            while (it.hasNext()) {
+                SerializableChunk sc = it.next();
+                if (sc == null || sc.getWorldName() == null || !worlds.contains(sc.getWorldName().trim())) {
+                    it.remove();
                     count++;
                 }
             }
         }
-
         return count;
     }
 }
