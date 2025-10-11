@@ -103,7 +103,7 @@
 			<version>5.0.1</version>
 			<scope>compile</scope>
 			<exclusions>
-				<!-- Verhindert, dass flow-math transitiv mitgeschattet wird -->
+
 				<exclusion>
 					<groupId>com.flowpowered</groupId>
 					<artifactId>flow-math</artifactId>
@@ -111,7 +111,6 @@
 			</exclusions>
 		</dependency>
 
-		<!-- FlowPowered Math: NICHT schatten, zur Laufzeit von BlueMap beziehen -->
 		<dependency>
 			<groupId>com.flowpowered</groupId>
 			<artifactId>flow-math</artifactId>
@@ -168,7 +167,6 @@
 			<scope>provided</scope>
 		</dependency>
 
-		<!-- Commodore: kompilieren & schatten -->
 		<dependency>
 			<groupId>me.lucko</groupId>
 			<artifactId>commodore</artifactId>
@@ -224,7 +222,6 @@
 									<include>me.lucko:commodore</include>
 								</includes>
 								<excludes>
-									<!-- Sicherheitshalber: flow-math niemals mitschatten -->
 									<exclude>com.flowpowered:flow-math</exclude>
 								</excludes>
 							</artifactSet>
@@ -238,7 +235,6 @@
 									<pattern>me.lucko.commodore</pattern>
 									<shadedPattern>tfagaming.projects.minecraft.homestead.libs.commodore</shadedPattern>
 								</relocation>
-								<!-- KEINE relocation von com.flowpowered.* -->
 							</relocations>
 						</configuration>
 					</execution>
