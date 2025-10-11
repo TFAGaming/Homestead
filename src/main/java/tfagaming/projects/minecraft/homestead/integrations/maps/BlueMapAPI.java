@@ -126,6 +126,9 @@ public class BlueMapAPI {
                 : Homestead.config.get("dynamic-maps.chunks.color"))
                 : region.getMapColor();
 
+        int chunkTransparencyInfill = Homestead.config.get("dynamic-maps.chunks.transparency-fill");
+        int chunkTransparencyOutline = Homestead.config.get("dynamic-maps.chunks.transparency-outline");
+
         World world = resolveRegionWorld(region);
         if (world == null) return;
 
@@ -155,8 +158,8 @@ public class BlueMapAPI {
                     .label(plainLabel)
                     .detail(hoverText)
                     .shape(cheese.getShape(), minY, maxY)
-                    .fillColor(new Color(chunkColor, 64))
-                    .lineColor(new Color(chunkColor, 255))
+                    .fillColor(new Color(chunkColor, chunkTransparencyInfill))
+                    .lineColor(new Color(chunkColor, chunkTransparencyOutline))
                     .lineWidth(2)
                     .depthTestEnabled(false);
 

@@ -38,14 +38,14 @@ public class ForceUnclaimCommand extends CommandBuilder {
     @Override
     public boolean onExecution(CommandSender sender, String[] args) {
         if (!(sender instanceof Player)) {
-            sender.sendMessage("You cannot use this command via the console.");
+            PlayerUtils.sendMessage(sender, 8);
             return false;
         }
 
         Player player = (Player) sender;
 
         if (!player.isOp()) {
-            player.sendMessage("§cOnly server operators can use this command.");
+            PlayerUtils.sendMessage(sender, 8);
             return true;
         }
 
