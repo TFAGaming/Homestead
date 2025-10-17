@@ -687,34 +687,6 @@ public class RegionProtectionListener implements Listener {
         }
     }
 
-    @EventHandler
-    public void onPlayerInteractEntity(PlayerInteractAtEntityEvent event) {
-        if (event.getRightClicked() instanceof ArmorStand) {
-            Player player = event.getPlayer();
-            Chunk chunk = event.getRightClicked().getLocation().getChunk();
-
-            if (player != null && ChunksManager.isChunkClaimed(chunk) && !PlayerUtils.isOperator(player)) {
-                Region region = ChunksManager.getRegionOwnsTheChunk(chunk);
-                SerializableSubArea subArea = region
-                        .findSubAreaHasLocationInside(event.getRightClicked().getLocation());
-
-                if (subArea != null) {
-                    if (!player.getUniqueId().equals(region.getOwnerId())
-                            && !PlayerUtils.hasPermissionFlag(region.getUniqueId(), subArea.getId(), player,
-                                    PlayerFlags.ARMOR_STANDS)) {
-                        event.setCancelled(true);
-                        return;
-                    }
-                } else {
-                    if (!player.getUniqueId().equals(region.getOwnerId())
-                            && !PlayerUtils.hasPermissionFlag(region.getUniqueId(), player, PlayerFlags.ARMOR_STANDS)) {
-                        event.setCancelled(true);
-                        return;
-                    }
-                }
-            }
-        }
-    }
 
     @EventHandler
     public void onPlayerPunchFrame(EntityDamageByEntityEvent event) {
@@ -807,36 +779,6 @@ public class RegionProtectionListener implements Listener {
         }
     }
 
-    @EventHandler
-    public void onPlayerInteractEntity(PlayerInteractEntityEvent event) {
-        if (event.getRightClicked().getType() == EntityType.ITEM_FRAME
-                || event.getRightClicked().getType() == EntityType.GLOW_ITEM_FRAME) {
-            Player player = event.getPlayer();
-            Chunk chunk = event.getRightClicked().getLocation().getChunk();
-
-            if (player != null && ChunksManager.isChunkClaimed(chunk) && !PlayerUtils.isOperator(player)) {
-                Region region = ChunksManager.getRegionOwnsTheChunk(chunk);
-                SerializableSubArea subArea = region
-                        .findSubAreaHasLocationInside(event.getRightClicked().getLocation());
-
-                if (subArea != null) {
-                    if (!player.getUniqueId().equals(region.getOwnerId())
-                            && !PlayerUtils.hasPermissionFlag(region.getUniqueId(), subArea.getId(), player,
-                                    PlayerFlags.ITEM_FRAME_ROTATION)) {
-                        event.setCancelled(true);
-                        return;
-                    }
-                } else {
-                    if (!player.getUniqueId().equals(region.getOwnerId())
-                            && !PlayerUtils.hasPermissionFlag(region.getUniqueId(), player,
-                                    PlayerFlags.ITEM_FRAME_ROTATION)) {
-                        event.setCancelled(true);
-                        return;
-                    }
-                }
-            }
-        }
-    }
 
     @EventHandler
     public void onBlockIgnite(BlockIgniteEvent event) {
@@ -1347,63 +1289,51 @@ public class RegionProtectionListener implements Listener {
         }
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onPlayerDropItem(PlayerDropItemEvent event) {
-        Player player = (Player) event.getPlayer();
-        Chunk chunk = player.getLocation().getChunk();
-
-        if (player != null && ChunksManager.isChunkClaimed(chunk) && !PlayerUtils.isOperator(player)) {
-            Region region = ChunksManager.getRegionOwnsTheChunk(chunk);
-
-            SerializableSubArea subArea = region
-                    .findSubAreaHasLocationInside(player.getLocation());
-
-            if (subArea != null) {
-                if (!player.getUniqueId().equals(region.getOwnerId())
-                        && !PlayerUtils.hasPermissionFlag(region.getUniqueId(), subArea.getId(), player,
-                                PlayerFlags.PICKUP_ITEMS)) {
-                    event.setCancelled(true);
-                    return;
-                }
-            } else {
-                if (!player.getUniqueId().equals(region.getOwnerId())
-                        && !PlayerUtils.hasPermissionFlag(region.getUniqueId(), player, PlayerFlags.PICKUP_ITEMS)) {
-                    event.setCancelled(true);
-                    return;
-                }
-            }
+        Player player = event.getPlayer();
+        if (shouldCancelItemTransfer(player)) {
+            event.setCancelled(true);
         }
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onPlayerPickupItem(EntityPickupItemEvent event) {
-        if (event.getEntity() instanceof Player) {
-            Player player = (Player) event.getEntity();
-            Chunk chunk = player.getLocation().getChunk();
-
-            if (player != null && ChunksManager.isChunkClaimed(chunk) && !PlayerUtils.isOperator(player)) {
-                Region region = ChunksManager.getRegionOwnsTheChunk(chunk);
-
-                SerializableSubArea subArea = region
-                        .findSubAreaHasLocationInside(player.getLocation());
-
-                if (subArea != null) {
-                    if (!player.getUniqueId().equals(region.getOwnerId())
-                            && !PlayerUtils.hasPermissionFlag(region.getUniqueId(), subArea.getId(), player,
-                                    PlayerFlags.PICKUP_ITEMS)) {
-                        event.setCancelled(true);
-                        return;
-                    }
-                } else {
-                    if (!player.getUniqueId().equals(region.getOwnerId())
-                            && !PlayerUtils.hasPermissionFlag(region.getUniqueId(), player, PlayerFlags.PICKUP_ITEMS)) {
-                        event.setCancelled(true);
-                        return;
-                    }
-                }
-            }
+        if (!(event.getEntity() instanceof Player)) return;
+        Player player = (Player) event.getEntity();
+        if (shouldCancelItemTransfer(player)) {
+            event.setCancelled(true);
         }
     }
+
+    /**
+     * Returns true if the player's item transfer (drop or pickup) should be cancelled
+     * based on region ownership, operator status, sub-area membership and the
+     * PICKUP_ITEMS flag resolution.
+     *
+     * @param player the player performing the action
+     * @return true to cancel the event, false to allow
+     */
+    private boolean shouldCancelItemTransfer(Player player) {
+        if (player == null) return false;
+        if (PlayerUtils.isOperator(player)) return false;
+
+        Chunk chunk = player.getLocation().getChunk();
+        if (!ChunksManager.isChunkClaimed(chunk)) return false;
+
+        Region region = ChunksManager.getRegionOwnsTheChunk(chunk);
+        if (region == null) return false;
+        if (player.getUniqueId().equals(region.getOwnerId())) return false;
+
+        SerializableSubArea subArea = region.findSubAreaHasLocationInside(player.getLocation());
+
+        boolean allowed = (subArea != null)
+                ? PlayerUtils.hasPermissionFlag(region.getUniqueId(), subArea.getId(), player, PlayerFlags.PICKUP_ITEMS)
+                : PlayerUtils.hasPermissionFlag(region.getUniqueId(), player, PlayerFlags.PICKUP_ITEMS);
+
+        return !allowed;
+    }
+
 
     @EventHandler
     public void onVehicleEnter(VehicleEnterEvent event) {
@@ -1566,38 +1496,72 @@ public class RegionProtectionListener implements Listener {
     }
 
     @EventHandler
-    public void onPlayerInteractEntity2(PlayerInteractEntityEvent event) {
+    public void onPlayerInteractEntity(PlayerInteractEntityEvent event) {
         Player player = event.getPlayer();
         Entity entity = event.getRightClicked();
-        Chunk chunk = entity.getLocation().getChunk();
-
-        if (entity != null) {
-            if (entity instanceof Entity) {
-                if (player != null && ChunksManager.isChunkClaimed(chunk) && !PlayerUtils.isOperator(player)) {
-                    Region region = ChunksManager.getRegionOwnsTheChunk(chunk);
-
-                    SerializableSubArea subArea = region
-                            .findSubAreaHasLocationInside(entity.getLocation());
-
-                    if (subArea != null) {
-                        if (!player.getUniqueId().equals(region.getOwnerId())
-                                && !PlayerUtils.hasPermissionFlag(region.getUniqueId(), subArea.getId(), player,
-                                        PlayerFlags.INTERACT_ENTITIES)) {
-                            event.setCancelled(true);
-                            return;
-                        }
-                    } else {
-                        if (!player.getUniqueId().equals(region.getOwnerId())
-                                && !PlayerUtils.hasPermissionFlag(region.getUniqueId(), player,
-                                        PlayerFlags.INTERACT_ENTITIES)) {
-                            event.setCancelled(true);
-                            return;
-                        }
-                    }
-                }
-            }
+        if (shouldCancelEntityInteraction(player, entity)) {
+            event.setCancelled(true);
         }
     }
+
+    @EventHandler
+    public void onPlayerInteractAtEntity(PlayerInteractAtEntityEvent event) {
+        Player player = event.getPlayer();
+        Entity entity = event.getRightClicked();
+        if (shouldCancelEntityInteraction(player, entity)) {
+            event.setCancelled(true);
+        }
+    }
+
+    /**
+     * Returns true if the interaction should be cancelled based on region ownership,
+     * sub-area membership and the required flag for the clicked entity type.
+     * <p>
+     * Required flags:
+     * <ul>
+     *   <li>ArmorStand → {@code PlayerFlags.ARMOR_STANDS}</li>
+     *   <li>Item Frames → {@code PlayerFlags.ITEM_FRAME_ROTATION}</li>
+     *   <li>Villager trading → {@code PlayerFlags.TRADE_VILLAGERS}</li>
+     *   <li>All other entities → {@code PlayerFlags.INTERACT_ENTITIES}</li>
+     * </ul>
+     *
+     * @param player the interacting player
+     * @param entity the clicked entity
+     * @return true if the event should be cancelled
+     */
+    private boolean shouldCancelEntityInteraction(Player player, Entity entity) {
+        if (player == null || entity == null) return false;
+        if (PlayerUtils.isOperator(player)) return false;
+
+        Chunk chunk = entity.getLocation().getChunk();
+        if (!ChunksManager.isChunkClaimed(chunk)) return false;
+
+        Region region = ChunksManager.getRegionOwnsTheChunk(chunk);
+        if (region == null) return false;
+
+        if (player.getUniqueId().equals(region.getOwnerId())) return false;
+
+        long requiredFlag;
+        EntityType type = entity.getType();
+
+        if (type == EntityType.ITEM_FRAME || type == EntityType.GLOW_ITEM_FRAME) {
+            requiredFlag = PlayerFlags.ITEM_FRAME_ROTATION;
+        } else if (entity instanceof org.bukkit.entity.Villager) {
+            requiredFlag = PlayerFlags.TRADE_VILLAGERS;
+        } else if (entity instanceof org.bukkit.entity.ArmorStand) {
+            requiredFlag = PlayerFlags.ARMOR_STANDS;
+        } else {
+            requiredFlag = PlayerFlags.INTERACT_ENTITIES;
+        }
+
+        SerializableSubArea subArea = region.findSubAreaHasLocationInside(entity.getLocation());
+        boolean allowed = (subArea != null)
+                ? PlayerUtils.hasPermissionFlag(region.getUniqueId(), subArea.getId(), player, requiredFlag)
+                : PlayerUtils.hasPermissionFlag(region.getUniqueId(), player, requiredFlag);
+
+        return !allowed;
+    }
+
 
     @EventHandler
     public void onEntityToggleGlide(EntityToggleGlideEvent event) {
@@ -1632,33 +1596,31 @@ public class RegionProtectionListener implements Listener {
 
     @EventHandler
     public void onPlayerFallDamage(EntityDamageEvent event) {
-        if (event.getEntity() instanceof Player) {
-            if (event.getCause() == DamageCause.FALL || event.getCause() == DamageCause.FLY_INTO_WALL) {
-                Player player = (Player) event.getEntity();
-                Chunk chunk = player.getLocation().getChunk();
+        if (!(event.getEntity() instanceof Player)) return;
 
-                if (player != null && ChunksManager.isChunkClaimed(chunk)) {
-                    Region region = ChunksManager.getRegionOwnsTheChunk(chunk);
+        if (event.getCause() != DamageCause.FALL && event.getCause() != DamageCause.FLY_INTO_WALL) return;
 
-                    SerializableSubArea subArea = region
-                            .findSubAreaHasLocationInside(player.getLocation());
+        Player player = (Player) event.getEntity();
+        Chunk chunk = player.getLocation().getChunk();
 
-                    if (subArea != null) {
-                        if (PlayerUtils.hasPermissionFlag(region.getUniqueId(), subArea.getId(), player,
-                                PlayerFlags.TAKE_FALL_DAMAGE)) {
-                            event.setCancelled(true);
-                            return;
-                        }
-                    } else {
-                        if (PlayerUtils.hasPermissionFlag(region.getUniqueId(), player, PlayerFlags.TAKE_FALL_DAMAGE)) {
-                            event.setCancelled(true);
-                            return;
-                        }
-                    }
-                }
+        if (!ChunksManager.isChunkClaimed(chunk)) return;
+
+        Region region = ChunksManager.getRegionOwnsTheChunk(chunk);
+        SerializableSubArea subArea = region.findSubAreaHasLocationInside(player.getLocation());
+
+        if (subArea != null) {
+            boolean allowed = PlayerUtils.hasPermissionFlag(region.getUniqueId(), subArea.getId(), player, PlayerFlags.TAKE_FALL_DAMAGE);
+            if (!allowed) {
+                event.setCancelled(true);
+            }
+        } else {
+            boolean allowed = PlayerUtils.hasPermissionFlag(region.getUniqueId(), player, PlayerFlags.TAKE_FALL_DAMAGE);
+            if (!allowed) {
+                event.setCancelled(true);
             }
         }
     }
+
 
     // World protection
 
