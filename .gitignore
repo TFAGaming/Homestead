@@ -1,5 +1,8 @@
 target/
-homestead.jar
-.vscode
+out/
 src/test/
+homestead.jar
+homestead.iml
+
 .vscode
+.idea

@@ -529,7 +529,10 @@ public class RegionProtectionListener implements Listener {
                 return true;
             default:
                 final String n = type.name();
+
                 if (n.contains("CHEST")) return true;
+                if (n.contains("SHELF")) return true;
+
                 return false;
         }
     }
