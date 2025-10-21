@@ -3,6 +3,7 @@ package tfagaming.projects.minecraft.homestead.integrations.maps;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
 
 import com.flowpowered.math.vector.Vector2i;
 import com.technicjelle.BMUtils.Cheese;
@@ -49,38 +50,43 @@ public class BlueMapAPI {
     }
 
     /**
-     * Clears only Homestead markers, leaving markers from other plugins untouched.
+     * Clears only Homestead markers on all BlueMap maps and also clears markers
+     * inside cached sets to avoid stale, unattached instances.
      */
     public void clearAllMarkers() {
         for (BlueMapMap map : api.getMaps()) {
             MarkerSet set = map.getMarkerSets().get(MARKER_SET_ID);
             if (set != null) set.getMarkers().clear();
         }
+        for (MarkerSet cached : markerSets.values()) {
+            cached.getMarkers().clear();
+        }
     }
 
     /**
-     * Returns the {@link MarkerSet} for the specified world, creating it if necessary.
-     * Returns {@code null} if {@code world} is {@code null}.
+     * Returns the {@link MarkerSet} for the specified world and (re-)binds it
+     * to every BlueMap map of that world. This method is idempotent and safe to
+     * call repeatedly, even if BlueMap loads worlds later than this integration.
      *
-     * @param world the Bukkit world
-     * @return the corresponding marker set or {@code null}
+     * @param world the Bukkit world (may be null)
+     * @return the corresponding marker set or {@code null} if world is null
      */
     public MarkerSet getOrNewMarkerSet(World world) {
         if (world == null) return null;
 
-        MarkerSet markerSet = markerSets.get(world);
-        if (markerSet == null) {
-            markerSet = MarkerSet.builder().label("Homestead Regions").build();
-            markerSets.put(world, markerSet);
+        MarkerSet set = markerSets.computeIfAbsent(world,
+                w -> MarkerSet.builder().label("Homestead Regions").build());
 
-            final MarkerSet finalMarkerSet = markerSet;
-            api.getWorld(world).ifPresent(bmWorld -> {
-                for (BlueMapMap map : bmWorld.getMaps()) {
-                    map.getMarkerSets().put(MARKER_SET_ID, finalMarkerSet);
+        api.getWorld(world).ifPresent(bmWorld -> {
+            for (BlueMapMap map : bmWorld.getMaps()) {
+                Map<String, MarkerSet> mapSets = map.getMarkerSets();
+                if (mapSets.get(MARKER_SET_ID) != set) {
+                    mapSets.put(MARKER_SET_ID, set);
                 }
-            });
-        }
-        return markerSet;
+            }
+        });
+
+        return set;
     }
 
     /**
@@ -146,6 +152,11 @@ public class BlueMapAPI {
         try {
             platter = Cheese.createPlatterFromChunks(chunkCoordinates);
         } catch (Throwable t) {
+            Homestead.getInstance().getLogger().log(
+                    Level.WARNING,
+                    "BlueMap: Could not create shapes for region " + region.getName() +
+                            " (" + region.getUniqueId() + "): " + t.getMessage(), t
+            );
             return;
         }
 
@@ -172,21 +183,23 @@ public class BlueMapAPI {
             markers.put(markerId, marker);
         }
 
-        addRegionSpawnLocation(markerSet, region, hoverText);
+        addRegionSpawnLocation(world, markerSet, region, hoverText);
     }
 
     /**
-     * Adds a {@link POIMarker} for the region’s home or spawn location.
+     * Adds a {@link POIMarker} for the region’s home or spawn location,
+     * only if the location is in the same world as the given marker set.
      *
+     * @param world     the Bukkit world that the marker set belongs to
      * @param markerSet the marker set the POI will be added to
      * @param region    the region that owns the home
      * @param hoverText the hover text to display for the marker
      */
-    public void addRegionSpawnLocation(MarkerSet markerSet, Region region, String hoverText) {
+    public void addRegionSpawnLocation(World world, MarkerSet markerSet, Region region, String hoverText) {
         if (markerSet == null || region == null || region.getLocation() == null) return;
 
         Location loc = region.getLocation().getBukkitLocation();
-        if (loc == null) return;
+        if (loc == null || loc.getWorld() == null || !loc.getWorld().equals(world)) return;
 
         POIMarker marker = POIMarker.builder()
                 .label(region.getName() + " Home")

@@ -184,46 +184,54 @@ public class PlayerUtils {
         return false;
     }
 
+    /**
+     * Checks whether the given player has the specified player flag in the target region.
+     * If the player lacks the permission, a cooldown-gated info message is sent,
+     * except for the TAKE_FALL_DAMAGE flag where no message is shown.
+     * <p>
+     * Resolution order:
+     * 1) If the player is the active renter of the region, permissions are granted for all flags except PVP.
+     * 2) Otherwise, if the player is a member, the member flags are used.
+     * 3) Otherwise, the region's global player flags are used.
+     *
+     * @param regionId the region UUID
+     * @param player   the player to check
+     * @param flag     the PlayerFlags bit to check
+     * @return true if the action is allowed; false otherwise
+     */
     public static boolean hasPermissionFlag(UUID regionId, Player player, long flag) {
         Region region = RegionsManager.findRegion(regionId);
+        if (region == null) return true;
 
-        if (region != null) {
-            boolean response = true;
+        boolean response;
 
-            SerializableRent rent = region.getRent();
-
-            if (rent != null && rent.getPlayerId() != null
-                    && rent.getPlayerId().equals(player.getUniqueId()) && flag != PlayerFlags.PVP) {
-                response = true;
-            } else {
-                if (region.isPlayerMember(player)) {
-                    SerializableMember member = region.getMember(player);
-
-                    response = FlagsCalculator.isFlagSet(member.getFlags(), flag);
-                } else {
-                    response = FlagsCalculator.isFlagSet(region.getPlayerFlags(), flag);
-                }
-            }
-
-            if (!response && !cooldown.contains(player.getUniqueId())) {
-                Map<String, String> replacements = new HashMap<>();
-                replacements.put("{flag}", PlayerFlags.from(flag));
-                replacements.put("{region}", region.getName());
-
-                PlayerUtils.sendMessage(player, 50, replacements);
-
-                cooldown.add(player.getUniqueId());
-
-                Homestead.getInstance().runAsyncTaskLater(() -> {
-                    cooldown.remove(player.getUniqueId());
-                }, 3);
-            }
-
-            return response;
+        SerializableRent rent = region.getRent();
+        if (rent != null && rent.getPlayerId() != null
+                && rent.getPlayerId().equals(player.getUniqueId()) && flag != PlayerFlags.PVP) {
+            response = true;
+        } else if (region.isPlayerMember(player)) {
+            SerializableMember member = region.getMember(player);
+            response = FlagsCalculator.isFlagSet(member.getFlags(), flag);
+        } else {
+            response = FlagsCalculator.isFlagSet(region.getPlayerFlags(), flag);
         }
 
-        return true;
+        if (!response
+                && flag != PlayerFlags.TAKE_FALL_DAMAGE
+                && !cooldown.contains(player.getUniqueId())) {
+            Map<String, String> replacements = new HashMap<>();
+            replacements.put("{flag}", PlayerFlags.from(flag));
+            replacements.put("{region}", region.getName());
+
+            PlayerUtils.sendMessage(player, 50, replacements);
+
+            cooldown.add(player.getUniqueId());
+            Homestead.getInstance().runAsyncTaskLater(() -> cooldown.remove(player.getUniqueId()), 3);
+        }
+
+        return response;
     }
+
 
     public static boolean hasPermissionFlag(UUID regionId, UUID subAreaId, Player player, long flag) {
         Region region = RegionsManager.findRegion(regionId);
