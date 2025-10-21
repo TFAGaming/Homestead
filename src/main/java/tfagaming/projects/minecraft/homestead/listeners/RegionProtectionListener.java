@@ -9,12 +9,14 @@ import java.util.UUID;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Tag;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.Directional;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.*;
+import org.bukkit.event.Cancellable;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -99,33 +101,6 @@ public class RegionProtectionListener implements Listener {
             }
         }
     }
-
-    /*
-     * @EventHandler
-     * public void onSignBreak(BlockBreakEvent event) {
-     * Chunk chunk = event.getBlock().getChunk();
-     * 
-     * if (ChunksManager.isChunkClaimed(chunk)
-     * && SignUtils.isValidSign(event.getBlock().getType())) {
-     * Region region = ChunksManager.getRegionOwnsTheChunk(chunk);
-     * 
-     * BlockState state = event.getBlock().getState();
-     * Sign sign = (Sign) state;
-     * 
-     * String[] lines = sign.getSide(Side.FRONT).getLines();
-     * List<String> cleanLines = new ArrayList<>();
-     * 
-     * for (String line : lines) {
-     * cleanLines.add(ChatColor.stripColor(line));
-     * }
-     * 
-     * if (lines.length > 0 &&
-     * ChatColor.stripColor(lines[0]).equalsIgnoreCase("[Welcome]")) {
-     * region.setWelcomeSignToNull();
-     * }
-     * }
-     * }
-     */
 
     @EventHandler
     public void onInventoryOpen(InventoryOpenEvent event) {
@@ -363,358 +338,264 @@ public class RegionProtectionListener implements Listener {
         }
     }
 
+    /**
+     * Handles most player interaction with blocks and certain placeable items in claimed chunks.
+     * Uses Bukkit tags where available and centralizes permission gating to reduce branching and duplication.
+     */
     @EventHandler
     public void onPlayerInteract(PlayerInteractEvent event) {
-        Player player = event.getPlayer();
-        Block block = event.getClickedBlock();
-        Chunk chunk;
+        final Player player = event.getPlayer();
+        final Block clicked = event.getClickedBlock();
+        final Chunk chunk = (clicked != null ? clicked.getLocation().getChunk() : player.getLocation().getChunk());
 
-        if (block == null) {
-            chunk = player.getLocation().getChunk();
-        } else {
-            chunk = block.getLocation().getChunk();
+        if (!ChunksManager.isChunkClaimed(chunk)) return;
+        if (PlayerUtils.isOperator(player)) return;
+
+        final Region region = ChunksManager.getRegionOwnsTheChunk(chunk);
+        if (region == null) return;
+
+        final boolean isOwner = player.getUniqueId().equals(region.getOwnerId());
+        if (isOwner) return;
+
+        final SerializableSubArea subArea = (clicked != null) ? region.findSubAreaHasLocationInside(clicked.getLocation())
+                : region.findSubAreaHasLocationInside(player.getLocation());
+
+        if (event.getItem() != null) {
+            final Material itemType = event.getItem().getType();
+            final String itn = itemType.name();
+
+            final boolean placeSpawnItem =
+                    itn.contains("BOAT") ||
+                            itn.contains("ARMOR_STAND") ||
+                            itn.contains("MINECART") ||
+                            itn.contains("PAINTING") ||
+                            itemType == Material.BONE_MEAL;
+
+            if (placeSpawnItem) {
+                if (!requireFlag(region, subArea, player, PlayerFlags.PLACE_BLOCKS, event)) return;
+            }
         }
 
-        if (player != null && ChunksManager.isChunkClaimed(chunk) && !PlayerUtils.isOperator(player)) {
-            if (event.getItem() != null) {
-                if (event.getItem().getType().name().contains("BOAT")
-                        || event.getItem().getType().name().contains("ARMOR_STAND")
-                        || event.getItem().getType().name().contains("MINECART")
-                        || event.getItem().getType().name().contains("PAINTING")
-                        || event.getItem().getType().name().contains("BONE_MEAL")) {
-                    Region region = ChunksManager.getRegionOwnsTheChunk(chunk);
-                    SerializableSubArea subArea = block == null ? null
-                            : region.findSubAreaHasLocationInside(block.getLocation());
+        if (event.getAction() == Action.RIGHT_CLICK_BLOCK && clicked != null) {
+            final Material type = clicked.getType();
 
-                    if (subArea != null) {
-                        if (!player.getUniqueId().equals(region.getOwnerId())
-                                && !PlayerUtils.hasPermissionFlag(region.getUniqueId(), subArea.getId(), player,
-                                        PlayerFlags.PLACE_BLOCKS)) {
-                            event.setCancelled(true);
-                            return;
-                        }
-                    } else {
-                        if (!player.getUniqueId().equals(region.getOwnerId())
-                                && !PlayerUtils.hasPermissionFlag(region.getUniqueId(), player,
-                                        PlayerFlags.PLACE_BLOCKS)) {
-                            event.setCancelled(true);
-                            return;
-                        }
-                    }
-                }
+            if (isShulkerBox(type)) {
+                if (!requireFlag(region, subArea, player, PlayerFlags.CONTAINERS, event)) return;
             }
 
-            if (event.getAction() == Action.RIGHT_CLICK_BLOCK) {
-                Material material = event.getClickedBlock().getType();
+            if (isAnySign(type)) {
+                if (!requireFlag(region, subArea, player, PlayerFlags.GENERAL_INTERACTION, event)) return;
+            }
 
-                Region region = ChunksManager.getRegionOwnsTheChunk(chunk);
-                SerializableSubArea subArea = region
-                        .findSubAreaHasLocationInside(event.getClickedBlock().getLocation());
+            if (isContainerLike(type)) {
+                if (!requireFlag(region, subArea, player, PlayerFlags.CONTAINERS, event)) return;
+                return;
+            }
 
-                if ((material.name().contains("CHEST") && !material.equals(Material.ENDER_CHEST))
-                        || material.equals(Material.FURNACE)
-                        || material.equals(Material.SMOKER) || material.equals(Material.BLAST_FURNACE)
-                        || material.equals(Material.BREWING_STAND) || material.equals(Material.BARREL)
-                        || material.equals(Material.SHULKER_BOX) || material.equals(Material.BEACON)
-                        || material.equals(Material.DROPPER) || material.equals(Material.DISPENSER)
-                        || material.equals(Material.CHISELED_BOOKSHELF) || material.equals(Material.CAULDRON)
-                        || material.equals(Material.LAVA_CAULDRON) || material.equals(Material.WATER_CAULDRON)
-                        || material.equals(Material.LODESTONE) || material.name().contains("CAMPFIRE")
-                        || material.equals(Material.RESPAWN_ANCHOR) || material.equals(Material.BEEHIVE)
-                        || material.equals(Material.BEE_NEST) || material.equals(Material.HOPPER)) {
-                    if (subArea != null) {
-                        if (!player.getUniqueId().equals(region.getOwnerId())
-                                && !PlayerUtils.hasPermissionFlag(region.getUniqueId(), subArea.getId(), player,
-                                        PlayerFlags.CONTAINERS)) {
-                            event.setCancelled(true);
-                            return;
-                        }
-                    } else {
-                        if (!player.getUniqueId().equals(region.getOwnerId())
-                                && !PlayerUtils.hasPermissionFlag(region.getUniqueId(), player,
-                                        PlayerFlags.CONTAINERS)) {
-                            event.setCancelled(true);
-                            return;
-                        }
-                    }
-                } else if (material.name().contains("ANVIL")) {
-                    if (subArea != null) {
-                        if (!player.getUniqueId().equals(region.getOwnerId())
-                                && !PlayerUtils.hasPermissionFlag(region.getUniqueId(), subArea.getId(), player,
-                                        PlayerFlags.USE_ANVIL)) {
-                            event.setCancelled(true);
-                            return;
-                        }
-                    } else {
-                        if (!player.getUniqueId().equals(region.getOwnerId())
-                                && !PlayerUtils.hasPermissionFlag(region.getUniqueId(), player,
-                                        PlayerFlags.USE_ANVIL)) {
-                            event.setCancelled(true);
-                            return;
-                        }
-                    }
-                } else if (material.name().contains("TRAPDOOR")) {
-                    if (subArea != null) {
-                        if (!player.getUniqueId().equals(region.getOwnerId())
-                                && !PlayerUtils.hasPermissionFlag(region.getUniqueId(), subArea.getId(), player,
-                                        PlayerFlags.TRAP_DOORS)) {
-                            event.setCancelled(true);
-                            return;
-                        }
-                    } else {
-                        if (!player.getUniqueId().equals(region.getOwnerId())
-                                && !PlayerUtils.hasPermissionFlag(region.getUniqueId(), player,
-                                        PlayerFlags.TRAP_DOORS)) {
-                            event.setCancelled(true);
-                            return;
-                        }
-                    }
-                } else if (material.name().contains("DOOR")) {
-                    if (subArea != null) {
-                        if (!player.getUniqueId().equals(region.getOwnerId())
-                                && !PlayerUtils.hasPermissionFlag(region.getUniqueId(), subArea.getId(), player,
-                                        PlayerFlags.DOORS)) {
-                            event.setCancelled(true);
-                            return;
-                        }
-                    } else {
-                        if (!player.getUniqueId().equals(region.getOwnerId())
-                                && !PlayerUtils.hasPermissionFlag(region.getUniqueId(), player, PlayerFlags.DOORS)) {
-                            event.setCancelled(true);
-                            return;
-                        }
-                    }
-                } else if ((material.equals(Material.SUSPICIOUS_GRAVEL)
-                        || material.equals(Material.SUSPICIOUS_SAND))
-                        && player.getInventory().getItemInMainHand().getType() == Material.BRUSH) {
-                    if (subArea != null) {
-                        if (!player.getUniqueId().equals(region.getOwnerId())
-                                && !PlayerUtils.hasPermissionFlag(region.getUniqueId(), subArea.getId(), player,
-                                        PlayerFlags.BREAK_BLOCKS)) {
-                            event.setCancelled(true);
-                            return;
-                        }
-                    } else {
-                        if (!player.getUniqueId().equals(region.getOwnerId())
-                                && !PlayerUtils.hasPermissionFlag(region.getUniqueId(), player,
-                                        PlayerFlags.BREAK_BLOCKS)) {
-                            event.setCancelled(true);
-                            return;
-                        }
-                    }
-                } else if (material.name().contains("BUTTON")) {
-                    if (subArea != null) {
-                        if (!player.getUniqueId().equals(region.getOwnerId())
-                                && !PlayerUtils.hasPermissionFlag(region.getUniqueId(), subArea.getId(), player,
-                                        PlayerFlags.BUTTONS)) {
-                            event.setCancelled(true);
-                            return;
-                        }
-                    } else {
-                        if (!player.getUniqueId().equals(region.getOwnerId())
-                                && !PlayerUtils.hasPermissionFlag(region.getUniqueId(), player, PlayerFlags.BUTTONS)) {
-                            event.setCancelled(true);
-                            return;
-                        }
-                    }
-                } else if (material.name().contains("FENCE_GATE")) {
-                    if (subArea != null) {
-                        if (!player.getUniqueId().equals(region.getOwnerId())
-                                && !PlayerUtils.hasPermissionFlag(region.getUniqueId(), subArea.getId(), player,
-                                        PlayerFlags.FENCE_GATES)) {
-                            event.setCancelled(true);
-                            return;
-                        }
-                    } else {
-                        if (!player.getUniqueId().equals(region.getOwnerId())
-                                && !PlayerUtils.hasPermissionFlag(region.getUniqueId(), player,
-                                        PlayerFlags.FENCE_GATES)) {
-                            event.setCancelled(true);
-                            return;
-                        }
-                    }
-                } else if (material.name().contains("CANDLE")
-                        || material.equals(Material.CAKE)) {
-                    if (subArea != null) {
-                        if (!player.getUniqueId().equals(region.getOwnerId())
-                                && !PlayerUtils.hasPermissionFlag(region.getUniqueId(), subArea.getId(), player,
-                                        PlayerFlags.GENERAL_INTERACTION)) {
-                            event.setCancelled(true);
-                            return;
-                        }
-                    } else {
-                        if (!player.getUniqueId().equals(region.getOwnerId())
-                                && !PlayerUtils.hasPermissionFlag(region.getUniqueId(), player,
-                                        PlayerFlags.GENERAL_INTERACTION)) {
-                            event.setCancelled(true);
-                            return;
-                        }
-                    }
-                } else if (material.equals(Material.DECORATED_POT)
-                        || material.equals(Material.FLOWER_POT) || material.name().contains("POTTED")
-                        || (material.equals(Material.VAULT)
-                                && player.getInventory().getItemInMainHand().getType().name().contains("TRIAL_KEY"))
-                        || (material.equals(Material.LECTERN)
-                                && (player.getInventory().getItemInMainHand().getType().equals(Material.WRITTEN_BOOK)
-                                        || player.getInventory().getItemInMainHand().getType()
-                                                .equals(Material.WRITABLE_BOOK)))) {
-                    if (subArea != null) {
-                        if (!player.getUniqueId().equals(region.getOwnerId())
-                                && !PlayerUtils.hasPermissionFlag(region.getUniqueId(), subArea.getId(), player,
-                                        PlayerFlags.CONTAINERS)) {
-                            event.setCancelled(true);
-                            return;
-                        }
-                    } else {
-                        if (!player.getUniqueId().equals(region.getOwnerId())
-                                && !PlayerUtils.hasPermissionFlag(region.getUniqueId(), player,
-                                        PlayerFlags.CONTAINERS)) {
-                            event.setCancelled(true);
-                            return;
-                        }
-                    }
-                } else if (material.name().endsWith("_BED")) {
-                    if (subArea != null) {
-                        if (!player.getUniqueId().equals(region.getOwnerId())
-                                && !PlayerUtils.hasPermissionFlag(region.getUniqueId(), subArea.getId(), player,
-                                        PlayerFlags.SLEEP)) {
-                            event.setCancelled(true);
-                            return;
-                        }
-                    } else {
-                        if (!player.getUniqueId().equals(region.getOwnerId())
-                                && !PlayerUtils.hasPermissionFlag(region.getUniqueId(), player, PlayerFlags.SLEEP)) {
-                            event.setCancelled(true);
-                            return;
-                        }
-                    }
-                } else if (material.equals(Material.LEVER)) {
-                    if (subArea != null) {
-                        if (!player.getUniqueId().equals(region.getOwnerId())
-                                && !PlayerUtils.hasPermissionFlag(region.getUniqueId(), subArea.getId(), player,
-                                        PlayerFlags.LEVERS)) {
-                            event.setCancelled(true);
-                            return;
-                        }
-                    } else {
-                        if (!player.getUniqueId().equals(region.getOwnerId())
-                                && !PlayerUtils.hasPermissionFlag(region.getUniqueId(), player, PlayerFlags.LEVERS)) {
-                            event.setCancelled(true);
-                            return;
-                        }
-                    }
-                } else if (material.equals(Material.BELL)) {
-                    if (subArea != null) {
-                        if (!player.getUniqueId().equals(region.getOwnerId())
-                                && !PlayerUtils.hasPermissionFlag(region.getUniqueId(), subArea.getId(), player,
-                                        PlayerFlags.USE_BELLS)) {
-                            event.setCancelled(true);
-                            return;
-                        }
-                    } else {
-                        if (!player.getUniqueId().equals(region.getOwnerId())
-                                && !PlayerUtils.hasPermissionFlag(region.getUniqueId(), player,
-                                        PlayerFlags.USE_BELLS)) {
-                            event.setCancelled(true);
-                            return;
-                        }
-                    }
-                } else if (material.equals(Material.REPEATER) || material.equals(Material.COMPARATOR)
-                        || material.equals(Material.COMMAND_BLOCK) || material.equals(Material.COMMAND_BLOCK_MINECART)
-                        || material.equals(Material.REDSTONE) || material.equals(Material.REDSTONE_WIRE)
-                        || material.equals(Material.NOTE_BLOCK) || material.equals(Material.JUKEBOX)
-                        || material.equals(Material.COMPOSTER) || material.equals(Material.DAYLIGHT_DETECTOR)) {
-                    if (subArea != null) {
-                        if (!player.getUniqueId().equals(region.getOwnerId())
-                                && !PlayerUtils.hasPermissionFlag(region.getUniqueId(), subArea.getId(), player,
-                                        PlayerFlags.REDSTONE)) {
-                            event.setCancelled(true);
-                            return;
-                        }
-                    } else {
-                        if (!player.getUniqueId().equals(region.getOwnerId())
-                                && !PlayerUtils.hasPermissionFlag(region.getUniqueId(), player, PlayerFlags.REDSTONE)) {
-                            event.setCancelled(true);
-                            return;
-                        }
-                    }
-                }
-            } else {
-                Region region = ChunksManager.getRegionOwnsTheChunk(chunk);
+            if (isAnvil(type)) {
+                if (!requireFlag(region, subArea, player, PlayerFlags.USE_ANVIL, event)) return;
+                return;
+            }
 
-                if (event.getAction() == Action.PHYSICAL) {
-                    if (block != null && block.getType().name().contains("PRESSURE_PLATE")) {
-                        SerializableSubArea subArea = region
-                                .findSubAreaHasLocationInside(event.getClickedBlock().getLocation());
+            if (Tag.TRAPDOORS.isTagged(type)) {
+                if (!requireFlag(region, subArea, player, PlayerFlags.TRAP_DOORS, event)) return;
+                return;
+            }
 
-                        if (subArea != null) {
-                            if (!player.getUniqueId().equals(region.getOwnerId())
-                                    && !PlayerUtils.hasPermissionFlag(region.getUniqueId(), subArea.getId(), player,
-                                            PlayerFlags.PRESSURE_PLATES)) {
-                                event.setCancelled(true);
-                                return;
-                            }
-                        } else {
-                            if (!player.getUniqueId().equals(region.getOwnerId())
-                                    && !PlayerUtils.hasPermissionFlag(region.getUniqueId(), player,
-                                            PlayerFlags.PRESSURE_PLATES)) {
-                                event.setCancelled(true);
-                                return;
-                            }
-                        }
-                    } else if (block != null && block.getType() == Material.TRIPWIRE) {
-                        SerializableSubArea subArea = region
-                                .findSubAreaHasLocationInside(event.getClickedBlock().getLocation());
+            if (Tag.DOORS.isTagged(type) || type.name().contains("DOOR")) {
+                if (!requireFlag(region, subArea, player, PlayerFlags.DOORS, event)) return;
+                return;
+            }
 
-                        if (subArea != null) {
-                            if (!player.getUniqueId().equals(region.getOwnerId())
-                                    && !PlayerUtils.hasPermissionFlag(region.getUniqueId(), subArea.getId(), player,
-                                            PlayerFlags.TRIGGER_TRIPWIRE)) {
-                                event.setCancelled(true);
-                                return;
-                            }
-                        } else {
-                            if (!player.getUniqueId().equals(region.getOwnerId())
-                                    && !PlayerUtils.hasPermissionFlag(region.getUniqueId(), player,
-                                            PlayerFlags.TRIGGER_TRIPWIRE)) {
-                                event.setCancelled(true);
-                                return;
-                            }
-                        }
-                    }
-                }
+            if (isArchaeologyBlockWithBrush(type, player)) {
+                if (!requireFlag(region, subArea, player, PlayerFlags.BREAK_BLOCKS, event)) return;
+                return;
+            }
+
+            if (Tag.BUTTONS.isTagged(type)) {
+                if (!requireFlag(region, subArea, player, PlayerFlags.BUTTONS, event)) return;
+                return;
+            }
+
+            if (type.name().contains("FENCE_GATE")) {
+                if (!requireFlag(region, subArea, player, PlayerFlags.FENCE_GATES, event)) return;
+                return;
+            }
+
+            if (isSmallInteractable(type)) {
+                if (!requireFlag(region, subArea, player, PlayerFlags.GENERAL_INTERACTION, event)) return;
+                return;
+            }
+
+            if (isLecternOrVaultWithKey(type, player)) {
+                if (!requireFlag(region, subArea, player, PlayerFlags.CONTAINERS, event)) return;
+                return;
+            }
+
+            if (type.name().endsWith("_BED")) {
+                if (!requireFlag(region, subArea, player, PlayerFlags.SLEEP, event)) return;
+                return;
+            }
+
+            if (type == Material.LEVER) {
+                if (!requireFlag(region, subArea, player, PlayerFlags.LEVERS, event)) return;
+                return;
+            }
+
+            if (type == Material.BELL) {
+                if (!requireFlag(region, subArea, player, PlayerFlags.USE_BELLS, event)) return;
+                return;
+            }
+
+            if (isRedstoneInteraction(type)) {
+                if (!requireFlag(region, subArea, player, PlayerFlags.REDSTONE, event)) return;
+            }
+            return;
+        }
+
+        if (event.getAction() == Action.PHYSICAL && clicked != null) {
+            final Material type = clicked.getType();
+
+            if (Tag.PRESSURE_PLATES.isTagged(type)) {
+                if (!requireFlag(region, subArea, player, PlayerFlags.PRESSURE_PLATES, event)) return;
+                return;
+            }
+
+            if (type == Material.TRIPWIRE) {
+                if (!requireFlag(region, subArea, player, PlayerFlags.TRIGGER_TRIPWIRE, event)) return;
             }
         }
     }
 
-    @EventHandler
-    public void onPlayerInteractEntity(PlayerInteractAtEntityEvent event) {
-        if (event.getRightClicked() instanceof ArmorStand) {
-            Player player = event.getPlayer();
-            Chunk chunk = event.getRightClicked().getLocation().getChunk();
+    /**
+     * Centralized permission gate. Cancels the event if the player does not have the given flag.
+     */
+    private boolean requireFlag(Region region, SerializableSubArea subArea, Player player, long flag, Cancellable event) {
+        final boolean allowed = (subArea != null)
+                ? PlayerUtils.hasPermissionFlag(region.getUniqueId(), subArea.getId(), player, flag)
+                : PlayerUtils.hasPermissionFlag(region.getUniqueId(), player, flag);
 
-            if (player != null && ChunksManager.isChunkClaimed(chunk) && !PlayerUtils.isOperator(player)) {
-                Region region = ChunksManager.getRegionOwnsTheChunk(chunk);
-                SerializableSubArea subArea = region
-                        .findSubAreaHasLocationInside(event.getRightClicked().getLocation());
+        if (!allowed) {
+            event.setCancelled(true);
+            return false;
+        }
+        return true;
+    }
 
-                if (subArea != null) {
-                    if (!player.getUniqueId().equals(region.getOwnerId())
-                            && !PlayerUtils.hasPermissionFlag(region.getUniqueId(), subArea.getId(), player,
-                                    PlayerFlags.ARMOR_STANDS)) {
-                        event.setCancelled(true);
-                        return;
-                    }
-                } else {
-                    if (!player.getUniqueId().equals(region.getOwnerId())
-                            && !PlayerUtils.hasPermissionFlag(region.getUniqueId(), player, PlayerFlags.ARMOR_STANDS)) {
-                        event.setCancelled(true);
-                        return;
-                    }
-                }
-            }
+    /**
+     * Returns true for all shulker boxes using Bukkit tags with a simple fallback.
+     */
+    private boolean isShulkerBox(Material type) {
+        if (Tag.SHULKER_BOXES.isTagged(type)) return true;
+        final String n = type.name();
+        return n.endsWith("SHULKER_BOX");
+    }
+
+    /**
+     * Returns true for any kind of sign (standing, wall, hanging).
+     */
+    private boolean isAnySign(Material type) {
+        if (Tag.SIGNS.isTagged(type)) return true;
+        final String n = type.name();
+        return n.endsWith("_HANGING_SIGN")
+                || n.endsWith("_WALL_HANGING_SIGN")
+                || n.endsWith("_SIGN")
+                || n.endsWith("_WALL_SIGN");
+    }
+
+    /**
+     * Returns true for blocks gated by the CONTAINERS flag in your logic.
+     */
+    private boolean isContainerLike(Material type) {
+        if (type == Material.ENDER_CHEST) return false;
+        if (Tag.CAMPFIRES.isTagged(type)) return true;
+        if (isShulkerBox(type)) return true;
+
+        switch (type) {
+            case FURNACE:
+            case SMOKER:
+            case BLAST_FURNACE:
+            case BREWING_STAND:
+            case BARREL:
+            case BEACON:
+            case DROPPER:
+            case DISPENSER:
+            case CHISELED_BOOKSHELF:
+            case CAULDRON:
+            case LAVA_CAULDRON:
+            case WATER_CAULDRON:
+            case LODESTONE:
+            case HOPPER:
+                return true;
+            default:
+                final String n = type.name();
+                if (n.contains("CHEST")) return true;
+                return false;
         }
     }
+
+    /**
+     * Returns true if the block is an anvil variant.
+     */
+    private boolean isAnvil(Material type) {
+        return type.name().contains("ANVIL");
+    }
+
+    /**
+     * Returns true for archaeology brushing blocks when the player holds a brush.
+     */
+    private boolean isArchaeologyBlockWithBrush(Material type, Player player) {
+        if (!(type == Material.SUSPICIOUS_GRAVEL || type == Material.SUSPICIOUS_SAND)) return false;
+        return player.getInventory().getItemInMainHand().getType() == Material.BRUSH;
+    }
+
+    /**
+     * Returns true for small interactables handled under GENERAL_INTERACTION.
+     */
+    private boolean isSmallInteractable(Material type) {
+        if (type == Material.CAKE) return true;
+        if (type == Material.DECORATED_POT) return true;
+        if (type == Material.FLOWER_POT) return true;
+        final String n = type.name();
+        if (n.contains("POTTED")) return true;
+        return false;
+    }
+
+    /**
+     * Returns true if the block requires CONTAINERS based on item-in-hand logic (lectern with book, vault with trial key).
+     */
+    private boolean isLecternOrVaultWithKey(Material type, Player player) {
+        if (type == Material.LECTERN) {
+            final Material inHand = player.getInventory().getItemInMainHand().getType();
+            return inHand == Material.WRITTEN_BOOK || inHand == Material.WRITABLE_BOOK;
+        }
+        if (type == Material.VAULT) {
+            return player.getInventory().getItemInMainHand().getType().name().contains("TRIAL_KEY");
+        }
+        return false;
+    }
+
+    /**
+     * Returns true for blocks considered redstone interaction in your logic.
+     */
+    private boolean isRedstoneInteraction(Material type) {
+        switch (type) {
+            case REPEATER:
+            case COMPARATOR:
+            case COMMAND_BLOCK:
+            case COMMAND_BLOCK_MINECART:
+            case REDSTONE:
+            case REDSTONE_WIRE:
+            case NOTE_BLOCK:
+            case JUKEBOX:
+            case COMPOSTER:
+            case DAYLIGHT_DETECTOR:
+                return true;
+            default:
+                return false;
+        }
+    }
+
 
     @EventHandler
     public void onPlayerPunchFrame(EntityDamageByEntityEvent event) {
@@ -807,36 +688,6 @@ public class RegionProtectionListener implements Listener {
         }
     }
 
-    @EventHandler
-    public void onPlayerInteractEntity(PlayerInteractEntityEvent event) {
-        if (event.getRightClicked().getType() == EntityType.ITEM_FRAME
-                || event.getRightClicked().getType() == EntityType.GLOW_ITEM_FRAME) {
-            Player player = event.getPlayer();
-            Chunk chunk = event.getRightClicked().getLocation().getChunk();
-
-            if (player != null && ChunksManager.isChunkClaimed(chunk) && !PlayerUtils.isOperator(player)) {
-                Region region = ChunksManager.getRegionOwnsTheChunk(chunk);
-                SerializableSubArea subArea = region
-                        .findSubAreaHasLocationInside(event.getRightClicked().getLocation());
-
-                if (subArea != null) {
-                    if (!player.getUniqueId().equals(region.getOwnerId())
-                            && !PlayerUtils.hasPermissionFlag(region.getUniqueId(), subArea.getId(), player,
-                                    PlayerFlags.ITEM_FRAME_ROTATION)) {
-                        event.setCancelled(true);
-                        return;
-                    }
-                } else {
-                    if (!player.getUniqueId().equals(region.getOwnerId())
-                            && !PlayerUtils.hasPermissionFlag(region.getUniqueId(), player,
-                                    PlayerFlags.ITEM_FRAME_ROTATION)) {
-                        event.setCancelled(true);
-                        return;
-                    }
-                }
-            }
-        }
-    }
 
     @EventHandler
     public void onBlockIgnite(BlockIgniteEvent event) {
@@ -1347,63 +1198,51 @@ public class RegionProtectionListener implements Listener {
         }
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onPlayerDropItem(PlayerDropItemEvent event) {
-        Player player = (Player) event.getPlayer();
-        Chunk chunk = player.getLocation().getChunk();
-
-        if (player != null && ChunksManager.isChunkClaimed(chunk) && !PlayerUtils.isOperator(player)) {
-            Region region = ChunksManager.getRegionOwnsTheChunk(chunk);
-
-            SerializableSubArea subArea = region
-                    .findSubAreaHasLocationInside(player.getLocation());
-
-            if (subArea != null) {
-                if (!player.getUniqueId().equals(region.getOwnerId())
-                        && !PlayerUtils.hasPermissionFlag(region.getUniqueId(), subArea.getId(), player,
-                                PlayerFlags.PICKUP_ITEMS)) {
-                    event.setCancelled(true);
-                    return;
-                }
-            } else {
-                if (!player.getUniqueId().equals(region.getOwnerId())
-                        && !PlayerUtils.hasPermissionFlag(region.getUniqueId(), player, PlayerFlags.PICKUP_ITEMS)) {
-                    event.setCancelled(true);
-                    return;
-                }
-            }
+        Player player = event.getPlayer();
+        if (shouldCancelItemTransfer(player)) {
+            event.setCancelled(true);
         }
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onPlayerPickupItem(EntityPickupItemEvent event) {
-        if (event.getEntity() instanceof Player) {
-            Player player = (Player) event.getEntity();
-            Chunk chunk = player.getLocation().getChunk();
-
-            if (player != null && ChunksManager.isChunkClaimed(chunk) && !PlayerUtils.isOperator(player)) {
-                Region region = ChunksManager.getRegionOwnsTheChunk(chunk);
-
-                SerializableSubArea subArea = region
-                        .findSubAreaHasLocationInside(player.getLocation());
-
-                if (subArea != null) {
-                    if (!player.getUniqueId().equals(region.getOwnerId())
-                            && !PlayerUtils.hasPermissionFlag(region.getUniqueId(), subArea.getId(), player,
-                                    PlayerFlags.PICKUP_ITEMS)) {
-                        event.setCancelled(true);
-                        return;
-                    }
-                } else {
-                    if (!player.getUniqueId().equals(region.getOwnerId())
-                            && !PlayerUtils.hasPermissionFlag(region.getUniqueId(), player, PlayerFlags.PICKUP_ITEMS)) {
-                        event.setCancelled(true);
-                        return;
-                    }
-                }
-            }
+        if (!(event.getEntity() instanceof Player)) return;
+        Player player = (Player) event.getEntity();
+        if (shouldCancelItemTransfer(player)) {
+            event.setCancelled(true);
         }
     }
+
+    /**
+     * Returns true if the player's item transfer (drop or pickup) should be cancelled
+     * based on region ownership, operator status, sub-area membership and the
+     * PICKUP_ITEMS flag resolution.
+     *
+     * @param player the player performing the action
+     * @return true to cancel the event, false to allow
+     */
+    private boolean shouldCancelItemTransfer(Player player) {
+        if (player == null) return false;
+        if (PlayerUtils.isOperator(player)) return false;
+
+        Chunk chunk = player.getLocation().getChunk();
+        if (!ChunksManager.isChunkClaimed(chunk)) return false;
+
+        Region region = ChunksManager.getRegionOwnsTheChunk(chunk);
+        if (region == null) return false;
+        if (player.getUniqueId().equals(region.getOwnerId())) return false;
+
+        SerializableSubArea subArea = region.findSubAreaHasLocationInside(player.getLocation());
+
+        boolean allowed = (subArea != null)
+                ? PlayerUtils.hasPermissionFlag(region.getUniqueId(), subArea.getId(), player, PlayerFlags.PICKUP_ITEMS)
+                : PlayerUtils.hasPermissionFlag(region.getUniqueId(), player, PlayerFlags.PICKUP_ITEMS);
+
+        return !allowed;
+    }
+
 
     @EventHandler
     public void onVehicleEnter(VehicleEnterEvent event) {
@@ -1566,38 +1405,72 @@ public class RegionProtectionListener implements Listener {
     }
 
     @EventHandler
-    public void onPlayerInteractEntity2(PlayerInteractEntityEvent event) {
+    public void onPlayerInteractEntity(PlayerInteractEntityEvent event) {
         Player player = event.getPlayer();
         Entity entity = event.getRightClicked();
-        Chunk chunk = entity.getLocation().getChunk();
-
-        if (entity != null) {
-            if (entity instanceof Entity) {
-                if (player != null && ChunksManager.isChunkClaimed(chunk) && !PlayerUtils.isOperator(player)) {
-                    Region region = ChunksManager.getRegionOwnsTheChunk(chunk);
-
-                    SerializableSubArea subArea = region
-                            .findSubAreaHasLocationInside(entity.getLocation());
-
-                    if (subArea != null) {
-                        if (!player.getUniqueId().equals(region.getOwnerId())
-                                && !PlayerUtils.hasPermissionFlag(region.getUniqueId(), subArea.getId(), player,
-                                        PlayerFlags.INTERACT_ENTITIES)) {
-                            event.setCancelled(true);
-                            return;
-                        }
-                    } else {
-                        if (!player.getUniqueId().equals(region.getOwnerId())
-                                && !PlayerUtils.hasPermissionFlag(region.getUniqueId(), player,
-                                        PlayerFlags.INTERACT_ENTITIES)) {
-                            event.setCancelled(true);
-                            return;
-                        }
-                    }
-                }
-            }
+        if (shouldCancelEntityInteraction(player, entity)) {
+            event.setCancelled(true);
         }
     }
+
+    @EventHandler
+    public void onPlayerInteractAtEntity(PlayerInteractAtEntityEvent event) {
+        Player player = event.getPlayer();
+        Entity entity = event.getRightClicked();
+        if (shouldCancelEntityInteraction(player, entity)) {
+            event.setCancelled(true);
+        }
+    }
+
+    /**
+     * Returns true if the interaction should be cancelled based on region ownership,
+     * sub-area membership and the required flag for the clicked entity type.
+     * <p>
+     * Required flags:
+     * <ul>
+     *   <li>ArmorStand → {@code PlayerFlags.ARMOR_STANDS}</li>
+     *   <li>Item Frames → {@code PlayerFlags.ITEM_FRAME_ROTATION}</li>
+     *   <li>Villager trading → {@code PlayerFlags.TRADE_VILLAGERS}</li>
+     *   <li>All other entities → {@code PlayerFlags.INTERACT_ENTITIES}</li>
+     * </ul>
+     *
+     * @param player the interacting player
+     * @param entity the clicked entity
+     * @return true if the event should be cancelled
+     */
+    private boolean shouldCancelEntityInteraction(Player player, Entity entity) {
+        if (player == null || entity == null) return false;
+        if (PlayerUtils.isOperator(player)) return false;
+
+        Chunk chunk = entity.getLocation().getChunk();
+        if (!ChunksManager.isChunkClaimed(chunk)) return false;
+
+        Region region = ChunksManager.getRegionOwnsTheChunk(chunk);
+        if (region == null) return false;
+
+        if (player.getUniqueId().equals(region.getOwnerId())) return false;
+
+        long requiredFlag;
+        EntityType type = entity.getType();
+
+        if (type == EntityType.ITEM_FRAME || type == EntityType.GLOW_ITEM_FRAME) {
+            requiredFlag = PlayerFlags.ITEM_FRAME_ROTATION;
+        } else if (entity instanceof org.bukkit.entity.Villager) {
+            requiredFlag = PlayerFlags.TRADE_VILLAGERS;
+        } else if (entity instanceof org.bukkit.entity.ArmorStand) {
+            requiredFlag = PlayerFlags.ARMOR_STANDS;
+        } else {
+            requiredFlag = PlayerFlags.INTERACT_ENTITIES;
+        }
+
+        SerializableSubArea subArea = region.findSubAreaHasLocationInside(entity.getLocation());
+        boolean allowed = (subArea != null)
+                ? PlayerUtils.hasPermissionFlag(region.getUniqueId(), subArea.getId(), player, requiredFlag)
+                : PlayerUtils.hasPermissionFlag(region.getUniqueId(), player, requiredFlag);
+
+        return !allowed;
+    }
+
 
     @EventHandler
     public void onEntityToggleGlide(EntityToggleGlideEvent event) {
@@ -1632,33 +1505,31 @@ public class RegionProtectionListener implements Listener {
 
     @EventHandler
     public void onPlayerFallDamage(EntityDamageEvent event) {
-        if (event.getEntity() instanceof Player) {
-            if (event.getCause() == DamageCause.FALL || event.getCause() == DamageCause.FLY_INTO_WALL) {
-                Player player = (Player) event.getEntity();
-                Chunk chunk = player.getLocation().getChunk();
+        if (!(event.getEntity() instanceof Player)) return;
 
-                if (player != null && ChunksManager.isChunkClaimed(chunk)) {
-                    Region region = ChunksManager.getRegionOwnsTheChunk(chunk);
+        if (event.getCause() != DamageCause.FALL && event.getCause() != DamageCause.FLY_INTO_WALL) return;
 
-                    SerializableSubArea subArea = region
-                            .findSubAreaHasLocationInside(player.getLocation());
+        Player player = (Player) event.getEntity();
+        Chunk chunk = player.getLocation().getChunk();
 
-                    if (subArea != null) {
-                        if (PlayerUtils.hasPermissionFlag(region.getUniqueId(), subArea.getId(), player,
-                                PlayerFlags.TAKE_FALL_DAMAGE)) {
-                            event.setCancelled(true);
-                            return;
-                        }
-                    } else {
-                        if (PlayerUtils.hasPermissionFlag(region.getUniqueId(), player, PlayerFlags.TAKE_FALL_DAMAGE)) {
-                            event.setCancelled(true);
-                            return;
-                        }
-                    }
-                }
+        if (!ChunksManager.isChunkClaimed(chunk)) return;
+
+        Region region = ChunksManager.getRegionOwnsTheChunk(chunk);
+        SerializableSubArea subArea = region.findSubAreaHasLocationInside(player.getLocation());
+
+        if (subArea != null) {
+            boolean allowed = PlayerUtils.hasPermissionFlag(region.getUniqueId(), subArea.getId(), player, PlayerFlags.TAKE_FALL_DAMAGE);
+            if (!allowed) {
+                event.setCancelled(true);
+            }
+        } else {
+            boolean allowed = PlayerUtils.hasPermissionFlag(region.getUniqueId(), player, PlayerFlags.TAKE_FALL_DAMAGE);
+            if (!allowed) {
+                event.setCancelled(true);
             }
         }
     }
+
 
     // World protection
 
@@ -1976,20 +1847,21 @@ public class RegionProtectionListener implements Listener {
         Block block = event.getBlock();
         Chunk chunk = block.getChunk();
 
-        if (entity != null) {
-            if (ChunksManager.isChunkClaimed(chunk)) {
-                if (!(entity instanceof Player || entity instanceof Wither || entity instanceof Villager
-                        || entity instanceof Bee)
-                        && entity instanceof Mob) {
-                    Region region = ChunksManager.getRegionOwnsTheChunk(chunk);
+        if (entity == null) return;
 
-                    if (!region.isWorldFlagSet(WorldFlags.ENTITIES_GRIEF)) {
-                        event.setCancelled(true);
-                    }
+        if (entity instanceof Sheep || entity instanceof Goat || entity instanceof Cow) return;
+
+        if (ChunksManager.isChunkClaimed(chunk)) {
+            if (!(entity instanceof Player || entity instanceof Wither || entity instanceof Villager || entity instanceof Bee)
+                    && entity instanceof Mob) {
+                Region region = ChunksManager.getRegionOwnsTheChunk(chunk);
+                if (!region.isWorldFlagSet(WorldFlags.ENTITIES_GRIEF)) {
+                    event.setCancelled(true);
                 }
             }
         }
     }
+
 
     @EventHandler
     public void onCreatureSpawn(CreatureSpawnEvent event) {
