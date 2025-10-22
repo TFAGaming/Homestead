@@ -454,3 +454,4 @@ default-world-flags:
   ice-melting: true # Ice melting: Allow ice to melt?
   snowman-trails: true # Snowman trails: Allow snow golems to leave snow trails?
   windcharge-burst: false # Windcharge burst: Allow windcharges to burst?
+  wilderness-copper-golems: false # Wilderness copper golems: Allow wilderness copper golems to enter the region?

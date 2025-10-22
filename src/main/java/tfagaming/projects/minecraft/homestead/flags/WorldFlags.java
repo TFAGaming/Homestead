@@ -26,13 +26,14 @@ public class WorldFlags {
     public static final long ICE_MELTING = 1L << 17; // OK
     public static final long SNOWMAN_TRAILS = 1L << 18; // OK
     public static final long WINDCHARGE_BURST = 1L << 19; // OK
+    public static final long WILDERNESS_COPPER_GOLEMS = 1L << 20; // OK
 
     public static List<String> getFlags() {
         return Lists.newArrayList("passive-entities-spawn", "hostile-entities-spawn", "entities-grief",
                 "entities-damage-entities", "leaves-decay", "fire-spread", "liquid-flow", "explosions-damage",
                 "wither-damage", "wilderness-pistons", "wilderness-dispensers", "wilderness-minecarts", "plant-growth",
                 "grass-growth", "sculk-spread", "player-glowing", "snow-melting", "ice-melting", "snowman-trails",
-                "windcharge-burst");
+                "windcharge-burst", "wilderness-copper-golems");
     }
 
     public static long valueOf(String name) {

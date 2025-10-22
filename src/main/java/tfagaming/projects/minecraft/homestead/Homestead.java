@@ -9,6 +9,8 @@ import java.util.UUID;
 
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.World;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -222,6 +224,16 @@ public class Homestead extends JavaPlugin {
 		registerExternalPlugins();
 
 		initOptionalBlueMapIntegration();
+
+		runAsyncTaskLater(() -> {
+			runSyncTimerTask(() -> {
+				for (World world : Bukkit.getWorlds()) {
+					for (Entity entity : world.getEntities()) {
+						RegionProtectionListener.onEntityMove(entity);
+					}
+				}
+			}, 5L);
+		},  10);
 	}
 
 	private void registerCommands() {
@@ -296,6 +308,16 @@ public class Homestead extends JavaPlugin {
 		long intervalTicks = interval * 20L;
 
 		Bukkit.getScheduler().runTaskTimerAsynchronously(this, callable, 0L, intervalTicks);
+	}
+
+	/**
+	 * Run a repeating task synchronously with interval in ticks.
+	 *
+	 * @param callable The task to run.
+	 * @param ticks The interval, in ticks.
+	 */
+	public void runSyncTimerTask(Runnable callable, long ticks) {
+		Bukkit.getScheduler().runTaskTimer(this, callable, 0L, ticks);
 	}
 
 	/**

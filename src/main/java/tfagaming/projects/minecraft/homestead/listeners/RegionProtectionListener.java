@@ -1,10 +1,6 @@
 package tfagaming.projects.minecraft.homestead.listeners;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 import org.bukkit.Chunk;
 import org.bukkit.Location;
@@ -46,6 +42,8 @@ import tfagaming.projects.minecraft.homestead.structure.serializable.*;
 import tfagaming.projects.minecraft.homestead.tools.minecraft.players.PlayerUtils;
 
 public class RegionProtectionListener implements Listener {
+    public static final Map<UUID, Location> lastLocations = new HashMap<>();
+
     // Blocks protection
 
     @EventHandler(priority = EventPriority.HIGHEST)
@@ -2003,6 +2001,44 @@ public class RegionProtectionListener implements Listener {
             } else if (!fromRegion.getUniqueId().equals(toRegion.getUniqueId())) {
                 if (!toRegion.isWorldFlagSet(WorldFlags.WILDERNESS_MINECARTS)) {
                     event.getVehicle().remove();
+                }
+            }
+        }
+    }
+
+    /**
+     * Static function to listen when an entity s.
+     */
+    public static void onEntityMove(Entity entity) {
+        Location from = lastLocations.get(entity.getUniqueId());
+        Location to = entity.getLocation();
+
+        if (from == null) {
+            from = entity.getLocation();
+        }
+
+        Chunk fromChunk = from.getChunk();
+        Chunk toChunk = to.getChunk();
+
+        lastLocations.put(entity.getUniqueId(), to.clone());
+
+        if (fromChunk.equals(toChunk)) {
+            return;
+        }
+
+        if (ChunksManager.isChunkClaimed(toChunk)) {
+            if (entity.getType().name().contains("COPPER_GOLEM") && !(entity instanceof Player)) {
+                Region fromRegion = ChunksManager.getRegionOwnsTheChunk(fromChunk);
+                Region toRegion = ChunksManager.getRegionOwnsTheChunk(toChunk);
+
+                if (fromRegion == null) {
+                    if (!toRegion.isWorldFlagSet(WorldFlags.WILDERNESS_COPPER_GOLEMS)) {
+                        entity.remove();
+                    }
+                } else if (!fromRegion.getUniqueId().equals(toRegion.getUniqueId())) {
+                    if (!toRegion.isWorldFlagSet(WorldFlags.WILDERNESS_COPPER_GOLEMS)) {
+                        entity.remove();
+                    }
                 }
             }
         }

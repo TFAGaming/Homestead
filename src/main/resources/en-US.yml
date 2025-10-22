@@ -342,6 +342,9 @@ flags-info:
   windcharge-burst:
     description: "Allow windcharges to burst?"
     type: WIND_CHARGE
+  wilderness-copper-golems:
+    description: "Allow copper golems outside regions to enter to the region?"
+    type: CHISELED_COPPER
 
   # REGION CONTROL FLAGS
   trust-players:
