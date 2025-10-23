@@ -9,7 +9,7 @@ A database is a way to store data for all regions on a server. Homestead provide
 | PostgreSQL       | Yes        | For big servers (~1,000 players daily)    
 | MariaDB          | No         | Upcoming... 
 | MySQL            | Yes        | For big servers (~1,000 players daily)
-| SQLite (Default) | Yes        | For small servers (~200 players daily)
+| SQLite (Default) | Yes        | For small servers (~100 players daily)
 | YAML             | Yes        | For small and friends-only servers (~50 players)
 
 ## Setup

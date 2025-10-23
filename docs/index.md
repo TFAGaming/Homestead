@@ -4,15 +4,15 @@ This is the documentation site for Homestead, a land-claiming plugin.
 
 !!! donating "Donating"
 
-    Homestead was released to be an open-source and free land-claiming plugin for Minecraft. If you loved my project,
-    you can donate by reading [this page](./Donating.md). One small donation makes me happy. 😊
+    Homestead was released to be an open-source and free land-claiming plugin for everybody. If you loved my project,
+    please consider donating [right here](./Donating.md). One small donation makes me happy. 😊
 
 ## Important Pages
 - [Changelog](./Changelog.md)
 - [Support](./Support.md)
 - Usage
     - [Creating Regions](./Usage/Creating%20a%20new%20Region.md)
-    - [Editiong Regions](./Usage/Editing%20a%20Region.md)
+    - [Editing Regions](./Usage/Editing%20a%20Region.md)
     - [Sub-Areas](./Usage/Sub-Areas.md)
     - [Upkeep](./Usage/Upkeep.md)
     - [Taxes](./Usage/Taxes.md)

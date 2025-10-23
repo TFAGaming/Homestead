@@ -61,26 +61,27 @@ default-world-flags:
 
 ## World Flags
 
-| Flag                     | Default | Explanation                                                                              |
-| ------------------------ | :-------: | ---------------------------------------------------------------------------------------- |
-| passive-entities-spawn   | Allow   | Allow passive entities to spawn?                              |
-| hostile-entities-spawn   | Allow   | Allow hostile entities to spawn?                              |
-| entities-grief           | Deny    | Allow entities (except Creeper) to grief?                     |
-| entities-damage-entities | Deny    | Allow entities to kill each other?                            |
-| leaves-decay             | Allow   | Allow leaves to decay?                                        |
-| fire-spread              | Deny    | Allow fire to spread within the region?                       |
-| liquid-flow              | Deny    | Allow any liquid to flow into the region?                     |
-| explosions-damage        | Deny    | Allow explosions (except Wither) to damage the region?        |
-| wither-damage            | Deny    | Allow wither to damage the region?                            |
-| wilderness-pistons       | Deny    | Allow wilderness pistons to push/pull blocks to your region?  |
-| wilderness-dispensers    | Deny    | Allow wilderness dispensers to dispense inside your region?   |
-| wilderness-minecarts     | Deny    | Allow wilderness minecarts to enter your region?              |
-| plant-growth             | Allow   | Allow plants to grow inside the region?                       |
-| grass-growth             | Allow   | Allow grass to spread inside the region?                      |
-| sculk-spread             | Allow   | Allow sculk to spread inside the region?                      |
-| player-glowing           | Allow   | Give the glowing effect to players?                           |
-| snow-melting             | Allow   | Allow snow to melt?                                           |
-| ice-melting              | Allow   | Allow ice to melt?                                            |
-| snowman-trails           | Allow   | Allow Snow Golem to leave snow trails?                        |
-| windcharge-burst         | Deny    | Allow Windcharges to burst inside the region?                 |
+| Flag                     | Default | Explanation                                                  |
+|--------------------------| :-------: |--------------------------------------------------------------|
+| passive-entities-spawn   | Allow   | Allow passive entities to spawn?                             |
+| hostile-entities-spawn   | Allow   | Allow hostile entities to spawn?                             |
+| entities-grief           | Deny    | Allow entities (except Creeper) to grief?                    |
+| entities-damage-entities | Deny    | Allow entities to kill each other?                           |
+| leaves-decay             | Allow   | Allow leaves to decay?                                       |
+| fire-spread              | Deny    | Allow fire to spread within the region?                      |
+| liquid-flow              | Deny    | Allow any liquid to flow into the region?                    |
+| explosions-damage        | Deny    | Allow explosions (except Wither) to damage the region?       |
+| wither-damage            | Deny    | Allow wither to damage the region?                           |
+| wilderness-pistons       | Deny    | Allow wilderness pistons to push/pull blocks to your region? |
+| wilderness-dispensers    | Deny    | Allow wilderness dispensers to dispense inside your region?  |
+| wilderness-minecarts     | Deny    | Allow wilderness minecarts to enter your region?             |
+| plant-growth             | Allow   | Allow plants to grow inside the region?                      |
+| grass-growth             | Allow   | Allow grass to spread inside the region?                     |
+| sculk-spread             | Allow   | Allow sculk to spread inside the region?                     |
+| player-glowing           | Allow   | Give the glowing effect to players?                          |
+| snow-melting             | Allow   | Allow snow to melt?                                          |
+| ice-melting              | Allow   | Allow ice to melt?                                           |
+| snowman-trails           | Allow   | Allow Snow Golem to leave snow trails?                       |
+| windcharge-burst         | Deny    | Allow Windcharges to burst inside the region?                |
+| wilderness-copper-golems | Deny    | Allow wilderness copper golems to enter the region?          |
 

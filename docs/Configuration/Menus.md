@@ -48,6 +48,7 @@ You can also use player heads! To set a custom texture for a player head, you mu
 1. Go to [Minecraft Heads](https://minecraft-heads.com/).
 2. Search for a head, such as "Grass", and select the one you like the most. In this example, we will choose this head: [Click here!](https://minecraft-heads.com/custom-heads/head/81357-grass-block)
 3. Scroll down until you find Minecraft URL, and then copy the URL.
-4. The URL format is like this: `http://textures.minecraft.net/texture/(Texture)`. Remove all characters before (Texture) and voila! You have got the texture ID (something like this: `f9e986ccac3dc804f1bebe054dfb3e800480b7e08b2e7c6a86c84621c756c142`), so copy it.
-5. Now, use this format in the button's type: PLAYERHEAD-(Texture), and replace (Texture) with the one you copied, so it should look like this: `PLAYERHEAD-f9e986ccac3dc804f1bebe054dfb3e800480b7e08b2e7c6a86c84621c756c142`.
+4. The URL format is like this: `http://textures.minecraft.net/texture/(Texture)`, copy it.
+5. Remove all characters before (Texture). You have got the texture ID (`f9e986ccac3dc804f1bebe054dfb3e800480b7e08b2e7c6a86c84621c756c142`), copy it.
+6. Now, use this format in the button's type: `PLAYERHEAD-(Texture)`, and replace (Texture) with the one you copied, so it should look like this: `PLAYERHEAD-f9e986ccac3dc804f1bebe054dfb3e800480b7e08b2e7c6a86c84621c756c142`.
 
