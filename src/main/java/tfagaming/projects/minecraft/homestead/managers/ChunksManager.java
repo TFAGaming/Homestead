@@ -26,22 +26,26 @@ import tfagaming.projects.minecraft.homestead.tools.minecraft.players.PlayerUtil
  */
 public class ChunksManager {
 
-    /** Claims a chunk for a specific region. */
-    public static void claimChunk(UUID id, Chunk chunk, OfflinePlayer... player) {
+    /**
+     * Claims a chunk for a specific region. Returns true if it was successfully claimed, otherwise false.
+     */
+    public static boolean claimChunk(UUID id, Chunk chunk, OfflinePlayer... player) {
         Region region = RegionsManager.findRegion(id);
-        if (region == null) return;
+        if (region == null) return false;
 
         if (!region.getChunks().isEmpty() && !hasAdjacentOwnedChunk(region, chunk)) {
             if (player.length > 0 && player[0] instanceof Player target && target.isOnline()) {
                 PlayerUtils.sendMessage(target, 140);
             }
-            return;
+            return false;
         }
 
         region.addChunk(new SerializableChunk(chunk));
 
         ChunkClaimEvent event = new ChunkClaimEvent(chunk, player.length > 0 ? player[0] : null);
         Homestead.getInstance().runSyncTask(() -> Bukkit.getPluginManager().callEvent(event));
+
+        return true;
     }
 
     /**

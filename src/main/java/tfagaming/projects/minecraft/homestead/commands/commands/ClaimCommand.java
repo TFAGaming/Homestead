@@ -97,18 +97,20 @@ public class ClaimCommand extends CommandBuilder {
             return true;
         }
 
-        ChunksManager.claimChunk(region.getUniqueId(), chunk, player);
+        boolean isClaimedSuccessfully = ChunksManager.claimChunk(region.getUniqueId(), chunk, player);
 
-        Map<String, String> replacements = new HashMap<String, String>();
-        replacements.put("{region}", region.getName());
+        if (isClaimedSuccessfully) {
+            Map<String, String> replacements = new HashMap<String, String>();
+            replacements.put("{region}", region.getName());
 
-        PlayerUtils.sendMessage(player, 22, replacements);
+            PlayerUtils.sendMessage(player, 22, replacements);
 
-        if (region.getLocation() == null) {
-            region.setLocation(new SerializableLocation(player.getLocation()));
+            if (region.getLocation() == null) {
+                region.setLocation(new SerializableLocation(player.getLocation()));
+            }
+
+            new ChunkParticlesSpawner(player);
         }
-
-        new ChunkParticlesSpawner(player);
 
         return true;
     }

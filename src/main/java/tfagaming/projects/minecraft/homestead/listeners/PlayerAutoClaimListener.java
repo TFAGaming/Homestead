@@ -145,24 +145,28 @@ public class PlayerAutoClaimListener implements Listener {
 
         /** Attempts to claim the chunk and confirms success by checking size difference. */
         int before = region.getChunks().size();
-        ChunksManager.claimChunk(region.getUniqueId(), chunk, player);
+
+        boolean isClaimedSuccessfully = ChunksManager.claimChunk(region.getUniqueId(), chunk, player);
+
         int after = region.getChunks().size();
 
-        /** Sends a success message only if the claim was actually added. */
-        if (after > before) {
-            Map<String, String> replacements = new HashMap<>();
-            replacements.put("{region}", region.getName());
-            PlayerUtils.sendMessage(player, 22, replacements);
-        }
+        if (isClaimedSuccessfully) {
+            /** Sends a success message only if the claim was actually added. */
+            if (after > before) {
+                Map<String, String> replacements = new HashMap<>();
+                replacements.put("{region}", region.getName());
+                PlayerUtils.sendMessage(player, 22, replacements);
+            }
 
-        /** Sets a default location for the region if not yet defined. */
-        if (region.getLocation() == null) {
-            region.setLocation(new SerializableLocation(player.getLocation()));
-        }
+            /** Sets a default location for the region if not yet defined. */
+            if (region.getLocation() == null) {
+                region.setLocation(new SerializableLocation(player.getLocation()));
+            }
 
-        /** Starts the visual border particle display if not already active. */
-        if (!ChunkParticlesSpawner.isTaskRunning(player)) {
-            new ChunkParticlesSpawner(player);
+            /** Starts the visual border particle display if not already active. */
+            if (!ChunkParticlesSpawner.isTaskRunning(player)) {
+                new ChunkParticlesSpawner(player);
+            }
         }
     }
 }
