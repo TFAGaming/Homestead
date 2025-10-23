@@ -44,14 +44,18 @@ public class ChunkParticlesSpawner {
     public ChunkParticlesSpawner(Player player) {
         this.player = player;
 
-        // Cancel any previously running particle task for this player
-        if (tasks.containsKey(player.getUniqueId())) {
-            BukkitTask taskFromMap = tasks.get(player.getUniqueId());
-            cancelTask(taskFromMap, player);
-        }
+        boolean isParticlesDisabled = Homestead.config.get("disable-particles");
 
-        // Start repeating particle effect every 15 ticks (0.75s)
-        startRepeatingEffect(15L);
+        if (!isParticlesDisabled) {
+            // Cancel any previously running particle task for this player
+            if (tasks.containsKey(player.getUniqueId())) {
+                BukkitTask taskFromMap = tasks.get(player.getUniqueId());
+                cancelTask(taskFromMap, player);
+            }
+
+            // Start repeating particle effect every 15 ticks (0.75s)
+            startRepeatingEffect();
+        }
     }
 
     /**
@@ -152,22 +156,20 @@ public class ChunkParticlesSpawner {
 
     /**
      * Starts the repeating task that spawns the particle effects.
-     *
-     * @param intervalTicks interval between each update in ticks
      */
-    public void startRepeatingEffect(long intervalTicks) {
-        BukkitTask task = new BukkitRunnable() {
-            @Override
-            public void run() {
-                spawnParticles();
-            }
-        }.runTaskTimer(Homestead.getInstance(), 0L, intervalTicks);
+    public void startRepeatingEffect() {
+        Homestead instance = Homestead.getInstance();
+
+        BukkitTask task = instance.runAsyncTimerTask(() -> {
+            spawnParticles();
+        }, 1);
 
         tasks.put(player.getUniqueId(), task);
 
         // Automatically cancel task after 60 seconds
-        Bukkit.getScheduler().runTaskLater(Homestead.getInstance(),
-                () -> cancelTask(task, player), 60 * 20L);
+        instance.runAsyncTaskLater(() -> {
+            cancelTask(task, player);
+        }, 60);
     }
 
     /**

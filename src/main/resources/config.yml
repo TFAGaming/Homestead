@@ -78,6 +78,10 @@ disabled-flags:
   - "use-bells"
   - "take-fall-damage"
 
+# Disable particles; Disable the dust particles from spawning around a region's borders.
+# To disable it, use "true", otherwise, "false".
+disable-particles: false
+
 # Region enter and leave titles; Customize the messages for players when entering or leaving a region.
 enter-exit-region-message:
   # Enable this feature? "true" to enable, "false" to disable.

@@ -16,6 +16,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import me.lucko.commodore.Commodore;
 import me.lucko.commodore.CommodoreProvider;
+import org.bukkit.scheduler.BukkitTask;
 import tfagaming.projects.minecraft.homestead.commands.CommandBuilder;
 import tfagaming.projects.minecraft.homestead.commands.MojangBrigadier;
 import tfagaming.projects.minecraft.homestead.commands.commands.*;
@@ -304,10 +305,10 @@ public class Homestead extends JavaPlugin {
 	 * @param callable The task to run.
 	 * @param interval The interval, in seconds.
 	 */
-	public void runAsyncTimerTask(Runnable callable, int interval) {
+	public BukkitTask runAsyncTimerTask(Runnable callable, int interval) {
 		long intervalTicks = interval * 20L;
 
-		Bukkit.getScheduler().runTaskTimerAsynchronously(this, callable, 0L, intervalTicks);
+		return Bukkit.getScheduler().runTaskTimerAsynchronously(this, callable, 0L, intervalTicks);
 	}
 
 	/**
