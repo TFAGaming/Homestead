@@ -1,2 +1,0 @@
-- [Prerequisites](Prerequisites.md)
-- [Intallation](Installation.md)
