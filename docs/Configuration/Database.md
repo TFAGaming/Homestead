@@ -14,9 +14,10 @@ A database is a way to store data for all regions on a server. Homestead provide
 
 ## Setup
 
-> **Before setup for PostgreSQL and MySQL**:<br>
-> For **PostgreSQL**, you must create a new "database with the name "homestead_data". <br>
-> For **MySQL**, you must create a new schema with the name "homestead_data".
+!!! warning "Before setup for PostgreSQL and MySQL"
+
+    For **PostgreSQL**, you must create a new database with the name "homestead_data".<br>
+    For **MySQL**, you must create a new schema with the name "homestead_data".
 
 By default, when you install Homestead, the selected provider is **SQLite**.
 

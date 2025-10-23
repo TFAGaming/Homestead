@@ -6,7 +6,7 @@ There are two options for limits:
 - **groups**: This will make Homestead use LuckPerms (or any other permissions plugin) to fetch a player's group and then get the group's limit.
 - **static**: This will make Homestead not use LuckPerms or any other permissions plugin, but all players will have the same limits (not depending on groups). Note that operators will have different limits.
 
-```yml
+```yaml
 limits:
   # Two valid options:
   # - 'static': Static limits; No permission plugins required.
@@ -16,9 +16,11 @@ limits:
 
 To change the limits, edit the following settings:
 
-> **Caution**: If a group is not found, any limit from that group will be 0 by default. Please make sure that all groups exist in the **config.yml** file.
+!!! warning "Undefined Group"
 
-```yml
+    If a group is not found, any limit from that group will be **0** by default. Please make sure that all groups exist in the **config.yml** file.
+
+```yaml
 limits:
   ...
 
@@ -90,11 +92,9 @@ In the following guide, you will know how to set permissions for a group using t
 - homestead.commands.homesteadadmin.updates
 - homestead.operator
 
-The `homestead.operator` permission is unique; It allows you to:
-1. Bypass any disabled flag for any region.
-2. Set any region as the targeted region; You can manage any region.
-3. Claim chunks adjacent to other regions.
-4. Ignored from: Delayed teleports, Taxes, Renting...
+!!! danger "Operator permissions"
+
+    Setting the permission `homestead.operator` to a group that doesn't have operator permission will cause major risks and grief on the server. The permission is powerful enough to manage any region and access the administrator commands that are made only for server operators to use Homestead. Please, double-check all the permissions you have set before saving.
 
 ### Region Management Permissions:
 Specific permissions for players to manage their regions.

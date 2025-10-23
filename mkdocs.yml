@@ -1,3 +1,17 @@
 site_name: Homestead
 theme:
   name: material
+  palette:
+    scheme: slate
+markdown_extensions:
+  - admonition
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
+  - pymdownx.details
+  - pymdownx.superfences
+  

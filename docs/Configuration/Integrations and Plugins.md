@@ -7,7 +7,7 @@ Homestead uses a lot of different APIs to communicate with other dependencies an
 
 To prevent players from claiming chunks inside a WorldGuard-protected area, enable this feature:
 
-```yml
+```yaml
 worldguard:
   protect-existing-regions: true
 ```
@@ -15,11 +15,13 @@ worldguard:
 ## WorldEdit
 Homestead uses a unique feature that only exists in **WorldEdit**, which is regenerating chunks.
 
-> **Warning**: This feature is deprecated by WorldEdit developers, and it's not recommended to keep it enabled when your server has very active players. Regenerating chunks requires a significant amount of memory, especially when a player or operator deletes a region with more than 4 claimed chunks.
+!!! warning "Deprecated Feature"
 
-To enable the feature, you must install WorldEdit and have this configuration enabled in config.yml:
+    This feature is deprecated by WorldEdit developers, and it's not recommended to keep it enabled when your server has very active players. Regenerating chunks requires a significant amount of memory, especially when a player or operator deletes a region with more than 4 claimed chunks.
 
-```yml
+To enable the feature, you must install WorldEdit and have this configuration enabled in **config.yml**:
+
+```yaml
 worldedit:
   regenerate-chunks: false
 ```
@@ -28,6 +30,7 @@ worldedit:
 **PlaceholderAPI** is a plugin that allows server owners to display information from various plugins in a uniform format.
 
 Available placeholders:
+
 - `%homestead_region_bank%`: Displays the region's bank balance.
 - `%homestead_region_name%`: Shows the name of the region.
 - `%homestead_region_current%`: Shows the name of the region that the player is currently inside.
@@ -49,7 +52,7 @@ Install one of these plugins, and restart the server. You should be able to see 
 - **Pl3xMap**: http://localhost:8080/
 - **dynmap**: http://localhost:8123/
 
-```yml
+```yaml
 dynamic-maps:
   # Enable this feature? "true" to enable, "false" to disable.
   enabled: true
