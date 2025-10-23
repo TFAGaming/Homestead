@@ -1,5 +1,6 @@
 site_name: Homestead
 site_author: Tayeb Yassine
+side_description: An advanced, chunk-based land claiming plugin for Minecraft servers, with multiple APIs support, based on Bukkit API.
 copyright: Copyright (©) 2025 Tayeb Yassine
 
 theme:
@@ -24,12 +25,12 @@ theme:
         name: Switch to light mode
 
   features:
-    - navigation.instant            # SPA-style page switches
+    #- navigation.instant            # SPA-style page switches
     - navigation.instant.progress   # thin progress bar while loading
     - navigation.tracking           # URL=#anchor follows scroll
-    - navigation.sections           # 2nd-level groups in sidebar
-    - navigation.expand             # auto-expand sidebar groups
-    - navigation.path               # breadcrumb above title
+    #- navigation.sections           # 2nd-level groups in sidebar
+    #- navigation.expand             # auto-expand sidebar groups
+    #- navigation.path               # breadcrumb above title
     - navigation.top                # "back to top" button
     - navigation.footer             # prev / next links
     - toc.integrate                 # merge TOC into left sidebar
