@@ -4,7 +4,7 @@ A database is a way to store data for all regions on a server. Homestead provide
 
 ## Providers
 
-| Provider | Implemented? | Notes |
+| Provider        | Implemented? | Notes |
 | :--------------- | :--------: | :----- |
 | PostgreSQL       | Yes        | For big servers (~1,000 players daily)    
 | MariaDB          | No         | Upcoming... 
@@ -14,7 +14,7 @@ A database is a way to store data for all regions on a server. Homestead provide
 
 ## Setup
 
-!!! warning "Before setup for PostgreSQL and MySQL"
+!!! warning "Important notice for PostgreSQL and MySQL"
 
     For **PostgreSQL**, you must create a new database with the name "homestead_data".<br>
     For **MySQL**, you must create a new schema with the name "homestead_data".

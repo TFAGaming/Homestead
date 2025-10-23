@@ -3,6 +3,7 @@
 Each player has a group; by default, it's `default`. They may upgrade to another rank, for example, `vip` group, so they need special upgrades for their regions, like 6+ more claims, 4+ members... etc.
 
 There are two options for limits:
+
 - **groups**: This will make Homestead use LuckPerms (or any other permissions plugin) to fetch a player's group and then get the group's limit.
 - **static**: This will make Homestead not use LuckPerms or any other permissions plugin, but all players will have the same limits (not depending on groups). Note that operators will have different limits.
 
@@ -22,8 +23,6 @@ To change the limits, edit the following settings:
 
 ```yaml
 limits:
-  ...
-
   # The limits for player groups.
   groups:
     # Group: default
@@ -84,7 +83,7 @@ In the following guide, you will know how to set permissions for a group using t
 4. Once you select all permissions, click on "+ Add". But before that, if you want to disallow the permissions for the selected group, click on "true" to change it to "false", and then "+ Add".
 5. You're good to go! You may need to leave the server and rejoin to update the commands for the client-side.
 
-### Operators / Administrators:
+### Operators
 - homestead.commands.homesteadadmin.importdata
 - homestead.commands.homesteadadmin.migratedata
 - homestead.commands.homesteadadmin.plugin
@@ -96,7 +95,7 @@ In the following guide, you will know how to set permissions for a group using t
 
     Setting the permission `homestead.operator` to a group that doesn't have operator permission will cause major risks and grief on the server. The permission is powerful enough to manage any region and access the administrator commands that are made only for server operators to use Homestead. Please, double-check all the permissions you have set before saving.
 
-### Region Management Permissions:
+### Region Management
 Specific permissions for players to manage their regions.
 
 - homestead.region.\*: This will give the group with all the permissions below.
@@ -117,7 +116,7 @@ Specific permissions for players to manage their regions.
 - homestead.region.dynamicmaps.icon
 - homestead.region.dynamicmaps.color
 
-### Command Permissions
+### Commands
 
 - homestead.commands.region.\*: This will give the group with all the permissions below.
 - homestead.commands.region.accept

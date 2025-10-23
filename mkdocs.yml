@@ -1,8 +1,47 @@
 site_name: Homestead
+site_author: Tayeb Yassine
+copyright: Copyright (©) 2025 Tayeb Yassine
+
 theme:
   name: material
+
+  icon:
+    repo: fontawesome/brands/github
+
   palette:
-    scheme: slate
+    - scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+
+    - scheme: slate
+      primary: black
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+
+  features:
+    - navigation.instant            # SPA-style page switches
+    - navigation.instant.progress   # thin progress bar while loading
+    - navigation.tracking           # URL=#anchor follows scroll
+    - navigation.sections           # 2nd-level groups in sidebar
+    - navigation.expand             # auto-expand sidebar groups
+    - navigation.path               # breadcrumb above title
+    - navigation.top                # "back to top" button
+    - navigation.footer             # prev / next links
+    - toc.integrate                 # merge TOC into left sidebar
+    - search.suggest                # search auto-suggest
+    - search.highlight              # highlight searched words
+    - content.code.copy             # copy button on code blocks
+    - content.code.annotate         # code annotations
+    - content.tabs.link             # sync same-named content tabs
+
+repo_url: https://github.com/TayebYassine/Homestead
+repo_name: TayebYassine/Homestead
+
 markdown_extensions:
   - admonition
   - pymdownx.highlight:
@@ -15,3 +54,5 @@ markdown_extensions:
   - pymdownx.details
   - pymdownx.superfences
   
+extra_css:
+  - stylesheets/extra.css

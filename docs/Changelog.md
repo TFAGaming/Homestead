@@ -1,17 +1,22 @@
 # Changelog
 
-This is a document that lists all the notable changes made to Homestead, such as new features, bug fixes, and improvements, with a list of all releases, including the obsolete ones.
+This is a document that lists all releases made to Homestead, including the obsolete ones.
 
-!!! warning "Unsupported Versions"
+## Latest Releases
 
-    Please keep the plugin updated with the recent releases. Using unsupported versions and then requesting
-    for help or reporting an issue will be automatically ignored and rejected.
-
-## Release 4.1.0
-
-The documentation site is still under construction.
+- [Release 4.1.0](https://www.spigotmc.org/resources/121873/update?update=615109)
+- [Release 4.0.4](https://www.spigotmc.org/resources/121873/update?update=612775)
 
 ## Table of Releases
+
+!!! warning "Unsupported Versions Notice"
+
+    Please keep the plugin updated with the recent releases. There are frequent updates and security patches, and to keep everything up to date, please use `/hsadmin updates`.
+
+!!! bug "Bugs and Exploits"
+
+    Using outdated and obsolete versions on your server will increase the chance of getting attackers and
+    griefers to join and raid your server.
 
 | Release | Series | Obsolete? |
 | :-----: | :----: | :-------: |
