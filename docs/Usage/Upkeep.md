@@ -9,4 +9,6 @@ For example, if your region has **16 chunks,** and the chunks multiplier is **$2
 
 !!! warning
 
-    If you fail to pay the upkeep, any chunk that is unable to be paid will be unclaimed. For example, a region has 10 claimed chunks, but it can pay the upkeep only for 6, so the 4 last claimed chunks will be unclaimed.
+    If you fail to pay the upkeep, any chunk that is unable to be paid will be unclaimed.
+
+    For example, a region has 10 claimed chunks, but it can pay the upkeep only for 6, so the 4 last claimed chunks will be unclaimed.

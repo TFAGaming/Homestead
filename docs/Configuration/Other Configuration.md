@@ -5,14 +5,22 @@
 Replace the command from `/region visit [region]` to `/region visit [player]`.
 
 ```yaml
-welcome-signs
+welcome-signs:
   # Enable this feature? "true" to enable, "false" to disable.
   enabled: false
 ```
 
-!!! info "Information"
+For full guide on Welcome signs usage, [click here](../Usage/Welcome%20Signs.md).
 
-    The only disadvantage of welcome signs is that trusted players cannot visit the regions where they are trusted unless the region's owner sets a welcome sign for everybody to visit.
+## Sub-Areas
+
+Allow sub-areas to be created on the server.
+
+```yaml
+sub-areas:
+  # Enable this feature? "true" to enable, "false" to disable.
+  enabled: true
+```
 
 ## Disabled worlds
 
@@ -35,4 +43,12 @@ disabled-flags:
   - "use-bells"
   - "no-fall-damage"
   - ...
+```
+
+## Disabled particles
+
+Disable particles from spawning around region or chunk's borders.
+
+```yaml
+disabled-particles: false
 ```

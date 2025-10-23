@@ -72,7 +72,7 @@ dynamic-maps:
     enabled: true
 
     # The default icon.
-    default: https://imgur.com/TUQzlCK.png
+    default: ...
 
     # The size for icons, must be a valid integer.
     size: 20 # 20x20

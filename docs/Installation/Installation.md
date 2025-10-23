@@ -5,7 +5,8 @@
 3. Drag and drop the **.jar** file in your server's plugins directory.
 4. Start the server, and have fun!
 
-!!! bug "Bugs and Exploits"
+!!! bug "Attackers Exploit Abusing Notice"
 
-    Using outdated and obsolete versions on your server will increase the chance of getting attackers and
-    griefers to join and raid your server.
+    Using outdated and obsolete versions on your server may let attackers abuse exploits to manipulate and do unattended actions.
+
+    We recommend you check the updates weekly with the command `/hsadmin updates`.

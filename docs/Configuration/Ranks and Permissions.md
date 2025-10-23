@@ -91,9 +91,14 @@ In the following guide, you will know how to set permissions for a group using t
 - homestead.commands.homesteadadmin.updates
 - homestead.operator
 
-!!! danger "Operator permissions"
+!!! danger "Operator Permissions"
 
-    Setting the permission `homestead.operator` to a group that doesn't have operator permission will cause major risks and grief on the server. The permission is powerful enough to manage any region and access the administrator commands that are made only for server operators to use Homestead. Please, double-check all the permissions you have set before saving.
+    Giving the permission `homestead.operator` to a group that doesn't have operator role (like moderator or administrator) will cause major risks
+    and grief on the server.
+
+    The permission is powerful enough to manage any region and access the administrator commands that are made only for server operators to use Homestead.
+
+    Please, double-check all the permissions you have set before saving.
 
 ### Region Management
 Specific permissions for players to manage their regions.
