@@ -32,7 +32,7 @@ import tfagaming.projects.minecraft.homestead.tools.minecraft.plugins.Integratio
 import tfagaming.projects.minecraft.homestead.tools.validator.YAMLValidator;
 
 public class Homestead extends JavaPlugin {
-	private final static String version = "4.1.0";
+	private final static String version = "4.1.1";
 	private static Homestead instance;
 	private static long startedAt;
 
