@@ -557,6 +557,22 @@ buttons:
       - ""
       - "&8➥ Left-click to rate this region."
     type: NETHER_STAR
+  62:
+    name: "&9Show All Regions"
+    lore:
+      - "&7Status: &aON"
+      - "&aCurrently showing all regions."
+      - ""
+      - "&8➥ Left-click to change."
+    type: EMERALD_BLOCK
+  63:
+    name: "&9Show All Regions"
+    lore:
+      - "&7Status: &cOFF"
+      - "&cCurrently showing your regions."
+      - ""
+      - "&8➥ Left-click to change."
+    type: REDSTONE_BLOCK
 
 button-types:
   world:

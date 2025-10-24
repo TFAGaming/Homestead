@@ -59,7 +59,7 @@ public class RegionsMenu {
      * @return true if player is op and has the toggle enabled
      */
     private static boolean isShowAllEnabled(Player p) {
-        return p.isOp() && ADMIN_SHOW_ALL.contains(p.getUniqueId());
+        return PlayerUtils.isOperator(p) && ADMIN_SHOW_ALL.contains(p.getUniqueId());
     }
 
     /**
@@ -69,8 +69,10 @@ public class RegionsMenu {
      * @param p player
      */
     private static void toggleShowAll(Player p) {
-        if (!p.isOp()) return;
+        if (!PlayerUtils.isOperator(p)) return;
+
         UUID id = p.getUniqueId();
+
         if (!ADMIN_SHOW_ALL.add(id)) ADMIN_SHOW_ALL.remove(id);
     }
 
@@ -101,20 +103,11 @@ public class RegionsMenu {
      * @return toggle item stack
      */
     private static ItemStack createAdminToggleItem(Player player) {
-        boolean on = isShowAllEnabled(player);
-
-        ItemStack item = new ItemStack(on ? Material.EMERALD_BLOCK : Material.REDSTONE_BLOCK);
-        ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(ChatColor.GREEN + "Show all regions");
-        List<String> lore = new ArrayList<>();
-        lore.add(ChatColor.GRAY + "Status: " + (on ? ChatColor.GREEN + "ON" : ChatColor.RED + "OFF"));
-        lore.add(ChatColor.DARK_GRAY + (on ? "(Currently showing all regions.)" : "(Showing only your regions.)"));
-        lore.add("");
-        lore.add(ChatColor.YELLOW + "Left-click: " + ChatColor.WHITE + "Toggle");
-        meta.setLore(lore);
-        meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
-        item.setItemMeta(meta);
-        return item;
+        if (isShowAllEnabled(player)) {
+            return MenuUtils.getButton(62);
+        } else {
+            return MenuUtils.getButton(63);
+        }
     }
 
     /**
@@ -127,7 +120,7 @@ public class RegionsMenu {
     private List<ItemStack> getItems(Player player) {
         List<ItemStack> items = new ArrayList<>();
 
-        if (player.isOp()) {
+        if (PlayerUtils.isOperator(player)) {
             items.add(createAdminToggleItem(player));
         }
 
@@ -175,7 +168,7 @@ public class RegionsMenu {
                 getItems(player),
                 (_player, event) -> _player.closeInventory(),
                 (_player, context) -> {
-                    boolean hasToggle = _player.isOp();
+                    boolean hasToggle = PlayerUtils.isOperator(_player);
                     int index = context.getIndex();
 
                     if (hasToggle && index == 0) {

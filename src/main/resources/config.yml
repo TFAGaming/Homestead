@@ -346,7 +346,7 @@ dynamic-maps:
     description: "<div style='font-size:16px;'><b>{region} (#{global-rank})</b></div>{region-description}<br><br><b>Owner</b>: {region-owner}<br><b>Members</b>: {region-members}<br><b>Chunks</b>: {region-chunks}<br><b>Size</b>: {region-size} blocks"
 
     # For every chunk.
-    # These features currently only works for the BLueMap Plugin.
+    # These features currently only works for the BlueMap Plugin.
     transparency-fill: 40 # Value 0 - 255 (For now only made for BlueMapAPI)
     transparency-outline: 125 # # Value 0 - 255 (For now only made for BlueMapAPI)
 
