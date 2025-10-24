@@ -1,14 +1,14 @@
 package tfagaming.projects.minecraft.homestead.commands.commands.subcommands.admin;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
+import me.angeschossen.lands.api.integration.LandsIntegration;
+import me.angeschossen.lands.api.land.ChunkCoordinate;
+import me.angeschossen.lands.api.land.Land;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 
 import com.cjburkey.claimchunk.ClaimChunk;
@@ -196,6 +196,49 @@ public class ImportDataSubCmd extends SubCommandBuilder {
 
                 break;
             }
+            case "lands": {
+                if (!isLandsInstalled()) {
+                    PlayerUtils.sendMessage(sender, 114);
+                    return true;
+                }
+
+                int imported = 0;
+
+                LandsIntegration landsApi = getLandsInstance();
+
+                for (Land land : landsApi.getLands()) {
+                    OfflinePlayer owner = Homestead.getInstance().getOfflinePlayerSync(land.getOwnerUID());
+
+                    if (owner == null) {
+                        continue;
+                    }
+
+                    Region region = RegionsManager.createRegion(owner.getName(), owner, true);
+
+                    for (World world : Bukkit.getWorlds()) {
+                        for (ChunkCoordinate chunkCoord : Objects.requireNonNull(land.getChunks(world))) {
+                            Chunk chunk = ChunksManager.getFromLocation(world, chunkCoord.getX(), chunkCoord.getZ());
+
+                            if (!ChunksManager.isChunkClaimed(chunk)) {
+                                ChunksManager.claimChunk(region.getUniqueId(), chunk);
+                            }
+                        }
+                    }
+
+                    Logger.info("Imported a region; Name = " + region.getName() + ", ID = "
+                            + region.getUniqueId().toString() + ", Owner = " + owner.getName() + " ("
+                            + owner.getUniqueId().toString() + ")");
+
+                    imported++;
+                }
+
+                Map<String, String> replacements = new HashMap<>();
+                replacements.put("{regions}", String.valueOf(imported));
+
+                PlayerUtils.sendMessage(sender, 115, replacements);
+
+                break;
+            }
             default:
                 PlayerUtils.sendMessage(sender, 113);
                 break;
@@ -235,7 +278,21 @@ public class ImportDataSubCmd extends SubCommandBuilder {
         }
     }
 
+    public static boolean isLandsInstalled() {
+        try {
+            return Bukkit.getServer().getPluginManager().getPlugin("Lands") != null
+                    && Bukkit.getServer().getPluginManager().getPlugin("Lands").isEnabled();
+        } catch (NoClassDefFoundError e) {
+            return false;
+        }
+    }
+
+
     public ILandLord getLandLordInstance() {
         return (ILandLord) Bukkit.getServer().getPluginManager().getPlugin("Landlord");
+    }
+
+    public LandsIntegration getLandsInstance() {
+        return new LandsIntegration(Homestead.getInstance());
     }
 }
