@@ -103,8 +103,10 @@ public class TrustPlayerSubCmd extends SubCommandBuilder {
         replacements.put("{ownername}", region.getOwner().getName());
 
         PlayerUtils.sendMessage(player, 36, replacements);
-        PlayerUtils.sendMessage(target.getPlayer(), 139, replacements);
 
+        if (target.isOnline()) {
+            PlayerUtils.sendMessage(target.getPlayer(), 139, replacements);
+        }
 
         RegionsManager.addNewLog(region.getUniqueId(), 2, replacements);
 
