@@ -48,6 +48,10 @@ selling:
 
 Require all region owners to pay for upkeep for every week (configurable) based on the number of chunks they've claimed.
 
+!!! warning
+
+    If you change one of the settings for the upkeep system, you must restart the server.
+
 ```yaml
 upkeep:
   # Enable this feature? "true" to enable, "false" to disable.
@@ -76,6 +80,10 @@ upkeep:
 ## Member Taxes
 
 Require all members of a region to pay taxes to stay trusted for every week (configurable).
+
+!!! warning
+
+    If you change one of the settings for the member taxes system, you must restart the server.
 
 ```yaml
 taxes:

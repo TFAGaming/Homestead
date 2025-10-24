@@ -10,7 +10,13 @@ To create a sub-area, you must select two points. To get the selection tool, cra
 
     This glitch won't affect the server's performance or the plugin's functionality.
 
-After getting the selection tool, hold the item, left-click on the first point, and right-click on the second point.
+## Selecting Two Points
+
+After getting the selection tool, hold the tool, left-click on the first point, and right-click on the second point.
+
+You cannot select a point outside a region!
+
+## Creating Sub-Area
 
 After selecting two points, use `/region subareas create [name]`.
 
