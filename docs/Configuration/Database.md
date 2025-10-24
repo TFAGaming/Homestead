@@ -5,12 +5,12 @@ A database is a way to store data for all regions on a server. Homestead provide
 ## Providers
 
 | Provider        | Implemented? | Notes |
-| :--------------- | :--------: | :----- |
-| PostgreSQL       | Yes        | For big servers (~1,000 players daily)    
-| MariaDB          | No         | Upcoming... 
-| MySQL            | Yes        | For big servers (~1,000 players daily)
-| SQLite (Default) | Yes        | For small servers (~100 players daily)
-| YAML             | Yes        | For small and friends-only servers (~50 players)
+| :--------------- |:------------:| :----- |
+| PostgreSQL       |     Yes      | For big servers (~1,000 players daily)    
+| MariaDB          |     Yes      | For big servers (~1,000 players daily) 
+| MySQL            |     Yes      | For big servers (~1,000 players daily)
+| SQLite (Default) |     Yes      | For small servers (~100 players daily)
+| YAML             |     Yes      | For small and friends-only servers (~50 players)
 
 ## Setup
 
@@ -24,6 +24,7 @@ By default, when you install Homestead, the selected provider is **SQLite**.
 If you have never let other players use Homestead, or you used it for testing before public joining, and you want to change the database provider, change the current provider name to the provider you want to use. These are the valid provider names:
 
 - PostgreSQL: `postgresql`
+- MariaDB: `mariadb`
 - MySQL: `mysql`
 - SQLite: `sqlite`
 - YAML: `yaml`
@@ -34,6 +35,13 @@ database:
 
   # PostgreSQL configuration:
   postgresql:
+    username: "USERNAME"
+    password: "PASSWORD"
+    host: "localhost"
+    port: 3306
+    
+  # MariaDB configuration:
+  mariadb:
     username: "USERNAME"
     password: "PASSWORD"
     host: "localhost"
