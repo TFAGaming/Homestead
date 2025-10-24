@@ -30,6 +30,7 @@ language: "en-US"
 # How would you like to store regions data?
 # Available database providers:
 # - PostgreSQL: postgresql (Recommended for advanced servers)
+# - MariaDB: mariadb (Recommended for advanced servers)
 # - MySQL: mysql (Recommended for advanced servers)
 # - SQLite: sqlite (Recommended for small servers)
 # - YAML: yaml
@@ -40,6 +41,13 @@ database:
 
   # PostgreSQL configuration:
   postgresql:
+    username: "USERNAME"
+    password: "PASSWORD"
+    host: "localhost"
+    port: 3306
+
+  # MariaDB configuration:
+  mariadb:
     username: "USERNAME"
     password: "PASSWORD"
     host: "localhost"

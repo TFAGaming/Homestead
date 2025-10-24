@@ -1,21 +1,20 @@
 package tfagaming.projects.minecraft.homestead.database;
 
 import tfagaming.projects.minecraft.homestead.Homestead;
-import tfagaming.projects.minecraft.homestead.database.providers.MySQL;
-import tfagaming.projects.minecraft.homestead.database.providers.PostgreSQL;
-import tfagaming.projects.minecraft.homestead.database.providers.SQLite;
-import tfagaming.projects.minecraft.homestead.database.providers.YAML;
+import tfagaming.projects.minecraft.homestead.database.providers.*;
 import tfagaming.projects.minecraft.homestead.logs.Logger;
 
 public class Database {
     private Provider provider;
     private PostgreSQL postgreSQL;
+    private MariaDB mariaDB;
     private MySQL mySQL;
     private SQLite sqLite;
     private YAML yaml;
 
     public enum Provider {
         PostgreSQL,
+        MariaDB,
         MySQL,
         SQLite,
         YAML
@@ -32,6 +31,12 @@ public class Database {
                         Homestead.config.get("database.postgresql.password"),
                         Homestead.config.get("database.postgresql.host"),
                         Homestead.config.get("database.postgresql.port"));
+                break;
+            case MariaDB:
+                mariaDB = new MariaDB(Homestead.config.get("database.mariadb.username"),
+                        Homestead.config.get("database.mariadb.password"),
+                        Homestead.config.get("database.mariadb.host"),
+                        Homestead.config.get("database.mariadb.port"));
                 break;
             case MySQL:
                 mySQL = new MySQL(Homestead.config.get("database.mysql.username"),
@@ -61,6 +66,12 @@ public class Database {
                         Homestead.config.get("database.postgresql.host"),
                         Homestead.config.get("database.postgresql.port"), handleError);
                 break;
+            case MariaDB:
+                mariaDB = new MariaDB(Homestead.config.get("database.mariadb.username"),
+                        Homestead.config.get("database.mariadb.password"),
+                        Homestead.config.get("database.mariadb.host"),
+                        Homestead.config.get("database.mariadb.port"), handleError);
+                break;
             case MySQL:
                 mySQL = new MySQL(Homestead.config.get("database.mysql.username"),
                         Homestead.config.get("database.mysql.password"), Homestead.config.get("database.mysql.host"),
@@ -81,6 +92,8 @@ public class Database {
         switch (provider.toLowerCase()) {
             case "postgresql":
                 return Provider.PostgreSQL;
+            case "mariadb":
+                return Provider.MariaDB;
             case "mysql":
                 return Provider.MySQL;
             case "sqlite":
@@ -101,6 +114,9 @@ public class Database {
             case PostgreSQL:
                 postgreSQL.importRegions();
                 break;
+            case MariaDB:
+                mariaDB.importRegions();
+                break;
             case MySQL:
                 mySQL.importRegions();
                 break;
@@ -119,6 +135,9 @@ public class Database {
         switch (provider) {
             case PostgreSQL:
                 postgreSQL.exportRegions();
+                break;
+            case MariaDB:
+                mariaDB.exportRegions();
                 break;
             case MySQL:
                 mySQL.exportRegions();
@@ -139,6 +158,9 @@ public class Database {
             case PostgreSQL:
                 postgreSQL.closeConnection();
                 break;
+            case MariaDB:
+                mariaDB.closeConnection();
+                break;
             case MySQL:
                 mySQL.closeConnection();
                 break;
@@ -157,6 +179,8 @@ public class Database {
         switch (provider) {
             case PostgreSQL:
                 return postgreSQL.getLatency();
+            case MariaDB:
+                return mariaDB.getLatency();
             case MySQL:
                 return mySQL.getLatency();
             case SQLite:
