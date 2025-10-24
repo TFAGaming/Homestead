@@ -5,6 +5,9 @@ import java.util.*;
 import me.angeschossen.lands.api.integration.LandsIntegration;
 import me.angeschossen.lands.api.land.ChunkCoordinate;
 import me.angeschossen.lands.api.land.Land;
+import net.william278.huskclaims.api.BukkitHuskClaimsAPI;
+import net.william278.huskclaims.api.HuskClaimsAPI;
+import net.william278.huskclaims.claim.ClaimWorld;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.OfflinePlayer;
@@ -239,6 +242,58 @@ public class ImportDataSubCmd extends SubCommandBuilder {
 
                 break;
             }
+            // this api gave me headache, please do not touch it
+            case "huskclaims": {
+                if (!isHuskClaimsInstalled()) {
+                    PlayerUtils.sendMessage(sender, 114);
+                    return true;
+                }
+
+                int imported = 0;
+
+                BukkitHuskClaimsAPI api = BukkitHuskClaimsAPI.getInstance();
+
+                for (OfflinePlayer offlinePlayer : Homestead.getInstance().getOfflinePlayersSync()) {
+                    if (offlinePlayer.getName() == null) {
+                        continue;
+                    }
+
+                    Region region = RegionsManager.createRegion(offlinePlayer.getName(), offlinePlayer, true);
+
+                    for (World world : Bukkit.getWorlds()) {
+                        net.william278.huskclaims.position.World hcWorld = api.getWorld(world.getName());
+
+                        Optional<ClaimWorld> claimWorld = api.getClaimWorld(hcWorld);
+
+                        claimWorld.ifPresent(claimWorld1 -> {
+                            claimWorld1.getClaims().forEach(claim -> {
+                                net.william278.huskclaims.claim.Region region1 = claim.getRegion();
+
+                                region1.getChunks().forEach(claimChunk -> {
+                                    Chunk chunk = ChunksManager.getFromLocation(world, claimChunk[0], claimChunk[1]);
+
+                                    if (!ChunksManager.isChunkClaimed(chunk)) {
+                                        ChunksManager.claimChunk(region.getUniqueId(), chunk);
+                                    }
+                                });
+                            });
+                        });
+
+                        Logger.info("Imported a region; Name = " + region.getName() + ", ID = "
+                                + region.getUniqueId().toString() + ", Owner = " + offlinePlayer.getName() + " ("
+                                + offlinePlayer.getUniqueId().toString() + ")");
+
+                        imported++;
+                    }
+                }
+
+                Map<String, String> replacements = new HashMap<>();
+                replacements.put("{regions}", String.valueOf(imported));
+
+                PlayerUtils.sendMessage(sender, 115, replacements);
+
+                break;
+            }
             default:
                 PlayerUtils.sendMessage(sender, 113);
                 break;
@@ -287,6 +342,14 @@ public class ImportDataSubCmd extends SubCommandBuilder {
         }
     }
 
+    public static boolean isHuskClaimsInstalled() {
+        try {
+            return Bukkit.getServer().getPluginManager().getPlugin("HuskClaims") != null
+                    && Bukkit.getServer().getPluginManager().getPlugin("HuskClaims").isEnabled();
+        } catch (NoClassDefFoundError e) {
+            return false;
+        }
+    }
 
     public ILandLord getLandLordInstance() {
         return (ILandLord) Bukkit.getServer().getPluginManager().getPlugin("Landlord");

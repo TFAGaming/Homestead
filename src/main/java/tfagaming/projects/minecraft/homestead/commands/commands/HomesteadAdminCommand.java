@@ -119,7 +119,7 @@ public class HomesteadAdminCommand extends CommandBuilder {
             }
             case "importdata": {
                 if (args.length == 2)
-                    suggestions.addAll(List.of("GriefPrevention", "LandLord", "ClaimChunk", "Lands"));
+                    suggestions.addAll(List.of("GriefPrevention", "LandLord", "ClaimChunk", "Lands", "HuskClaims"));
                 break;
             }
             case "flagsoverride": {
