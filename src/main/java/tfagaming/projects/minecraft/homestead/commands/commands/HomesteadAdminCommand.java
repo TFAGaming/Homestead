@@ -114,7 +114,7 @@ public class HomesteadAdminCommand extends CommandBuilder {
         switch (args[0].toLowerCase()) {
             case "migratedata": {
                 if (args.length == 2)
-                    suggestions.addAll(List.of("SQLite", "MySQL", "YAML", "PostgreSQL"));
+                    suggestions.addAll(List.of("SQLite", "MySQL", "YAML", "PostgreSQL", "MariaDB"));
                 break;
             }
             case "importdata": {
