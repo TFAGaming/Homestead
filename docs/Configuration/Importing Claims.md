@@ -19,5 +19,5 @@ Are you migrating from a different anti-grief plugin to Homestead? Follow the st
 | GriefPrevention |      Yes      |
 | ClaimChunk |      Yes      |
 | LandLord4 |      Yes      |
-| Lands | No (upcoming) |
-| Residence | No (upcoming) |
+| Lands |      Yes       |
+| HuskClaims | Yes |
