@@ -33,7 +33,7 @@ theme:
     #- navigation.path               # breadcrumb above title
     - navigation.top                # "back to top" button
     - navigation.footer             # prev / next links
-    - toc.integrate                 # merge TOC into left sidebar
+    # - toc.integrate                 # merge TOC into left sidebar
     - search.suggest                # search auto-suggest
     - search.highlight              # highlight searched words
     - content.code.copy             # copy button on code blocks
