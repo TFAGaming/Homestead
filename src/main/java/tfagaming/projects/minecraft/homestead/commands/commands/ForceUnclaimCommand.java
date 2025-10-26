@@ -44,7 +44,7 @@ public class ForceUnclaimCommand extends CommandBuilder {
 
         Player player = (Player) sender;
 
-        if (!player.isOp()) {
+        if (!PlayerUtils.isOperator(player)) {
             PlayerUtils.sendMessage(sender, 8);
             return true;
         }
