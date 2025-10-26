@@ -33,10 +33,11 @@ commands:
       - hsadmin
     default: op
   forceunclaim:
-    description:
-      OP-only: Unclaim the Chunk you are stay on, dont care if it is yours or not.
+    description: "Unclaim the Chunk you are stay on, don't care if it is yours or not."
     usage: /forceunclaim
-    aliases: [ opunclaim, adminunclaim ]
+    aliases:
+      - opunclaim
+      - adminunclaim
     permission: homestead.admin.forceunclaim
     default: op
 permissions:
@@ -51,6 +52,8 @@ permissions:
   homestead.region.players.ban:
     default: true
   homestead.region.players.unban:
+    default: true
+  homestead.region.players.kick:
     default: true
   homestead.region.flags.global:
     default: true
@@ -81,6 +84,7 @@ permissions:
       homestead.region.players.untrust: true
       homestead.region.players.ban: true
       homestead.region.players.unban: true
+      homestead.region.players.kick: true
       homestead.region.flags.global: true
       homestead.region.flags.world: true
       homestead.region.flags.members: true

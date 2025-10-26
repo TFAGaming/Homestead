@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -144,6 +145,9 @@ public class RegionCommand extends CommandBuilder {
             case "auto":
                 new AutoSubCmd().onExecution(sender, args);
                 break;
+            case "kick":
+                new KickPlayerSubCmd().onExecution(sender, args);
+                break;
             default:
                 String similaritySubCmds = StringSimilarity.findTopSimilarStrings(getSubcommands(), subCommand).stream()
                         .collect(Collectors.joining(", "));
@@ -218,6 +222,11 @@ public class RegionCommand extends CommandBuilder {
                     suggestions.addAll(RegionIconTools.getAllIcons());
                     suggestions.add("Default");
                 }
+                break;
+            }
+            case "kick": {
+                if (args.length == 2)
+                    suggestions.addAll(Bukkit.getOnlinePlayers().stream().map(Player::getName).toList());
                 break;
             }
             case "ban": {
@@ -358,6 +367,6 @@ public class RegionCommand extends CommandBuilder {
     public List<String> getSubcommands() {
         return Lists.newArrayList("create", "delete", "set", "rename", "borders", "ban", "unban", "trust", "untrust",
                 "flags", "accept", "deny", "visit", "subareas", "deposit", "withdraw", "menu", "player", "home",
-                "info", "banlist", "members", "claimlist", "help", "logs", "rate", "top", "auto");
+                "info", "banlist", "members", "claimlist", "help", "logs", "rate", "top", "auto", "kick");
     }
 }

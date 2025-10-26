@@ -165,6 +165,8 @@ prefix: "&8[&6HS&8]&r "
 140: "&cYou can only claim chunks that are next to your existing region!"
 141: "&cYou cannot unclaim this chunk because it would split your region!"
 142: "&cYou cannot set the location outside the region!"
+143: "&cThe player is not inside the region!"
+144: "&7Successfully kicked &3{playername} &7from &2{region}&7."
 
 logs:
   0: "&7Updated name from &2{oldname} &7to &2{newname}&7."

@@ -6,6 +6,8 @@ import java.util.List;
 import org.bukkit.Chunk;
 import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Player;
+import tfagaming.projects.minecraft.homestead.managers.ChunksManager;
 
 public class ChunkUtils {
     public static List<Chunk> getChunksInArea(Block corner1, Block corner2) {
@@ -30,5 +32,35 @@ public class ChunkUtils {
         }
         
         return chunks;
+    }
+
+    public static Chunk findNearbyUnclaimedChunk(Player player) {
+        Chunk startChunk = player.getLocation().getChunk();
+        World world = player.getWorld();
+        int startX = startChunk.getX();
+        int startZ = startChunk.getZ();
+
+        int radius = 1;
+        int maxRadius = 30;
+
+        while (radius <= maxRadius) {
+            for (int x = -radius; x <= radius; x++) {
+                for (int z = -radius; z <= radius; z++) {
+                    if (Math.abs(x) != radius && Math.abs(z) != radius) {
+                        continue;
+                    }
+
+                    Chunk currentChunk = world.getChunkAt(startX + x, startZ + z);
+
+                    if (!ChunksManager.isChunkClaimed(currentChunk)) {
+                        return currentChunk;
+                    }
+                }
+            }
+
+            radius++;
+        }
+
+        return null;
     }
 }

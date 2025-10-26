@@ -9,8 +9,11 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Chunk;
+import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
 
+import org.bukkit.entity.Player;
 import tfagaming.projects.minecraft.homestead.Homestead;
 import tfagaming.projects.minecraft.homestead.api.events.RegionCreateEvent;
 import tfagaming.projects.minecraft.homestead.api.events.RegionDeleteEvent;
@@ -300,6 +303,18 @@ public class RegionsManager {
     public static boolean isNameUsed(String name) {
         for (Region region : Homestead.cache.getAll()) {
             if (region.getName().equalsIgnoreCase(name)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public static boolean isPlayerInsideRegion(Player player, Region region) {
+        Chunk location = player.getLocation().getChunk();
+
+        for (SerializableChunk chunk : region.getChunks()) {
+            if (chunk.getX() == location.getX() && chunk.getZ() == location.getZ()) {
                 return true;
             }
         }
