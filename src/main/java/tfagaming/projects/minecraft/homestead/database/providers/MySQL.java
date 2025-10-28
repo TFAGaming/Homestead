@@ -14,6 +14,7 @@ import org.bukkit.OfflinePlayer;
 import tfagaming.projects.minecraft.homestead.Homestead;
 import tfagaming.projects.minecraft.homestead.logs.Logger;
 import tfagaming.projects.minecraft.homestead.structure.Region;
+import tfagaming.projects.minecraft.homestead.structure.War;
 import tfagaming.projects.minecraft.homestead.structure.serializable.*;
 import tfagaming.projects.minecraft.homestead.tools.java.ListUtils;
 
@@ -32,7 +33,7 @@ public class MySQL {
 
 			Logger.info("New database connection established.");
 
-			createTableIfNotExists();
+			createTablesIfNotExists();
 		} catch (ClassNotFoundException e) {
 			Logger.error("MySQL JDBC Driver not found.");
 			e.printStackTrace();
@@ -56,7 +57,7 @@ public class MySQL {
 
 			Logger.info("New database connection established.");
 
-			createTableIfNotExists();
+			createTablesIfNotExists();
 		} catch (ClassNotFoundException e) {
 			Logger.error("MySQL JDBC Driver not found.");
 			e.printStackTrace();
@@ -74,8 +75,8 @@ public class MySQL {
 		}
 	}
 
-	public void createTableIfNotExists() {
-		String sql = "CREATE TABLE IF NOT EXISTS regions (" +
+	public void createTablesIfNotExists() {
+		String sql1 = "CREATE TABLE IF NOT EXISTS regions (" +
 				"id VARCHAR(36) PRIMARY KEY, " +
 				"displayName TINYTEXT NOT NULL, " +
 				"name TINYTEXT NOT NULL, " +
@@ -103,10 +104,19 @@ public class MySQL {
 				"icon LONGTEXT" +
 				")";
 
+		String sql2 = "CREATE TABLE IF NOT EXISTS wars (" +
+				"id VARCHAR(36) PRIMARY KEY, " +
+				"displayName TINYTEXT NOT NULL, " +
+				"name TINYTEXT NOT NULL, " +
+				"description MEDIUMTEXT NOT NULL, " +
+				"regions LONGTEXT NOT NULL" +
+				")";
+
 		try (Statement stmt = connection.createStatement()) {
-			stmt.executeUpdate(sql);
+			stmt.executeUpdate(sql1);
+			stmt.executeUpdate(sql2);
 		} catch (SQLException e) {
-			Logger.error("Unable to execute a statement for MySQL.");
+			Logger.error("An unexpected error occurred for the provider: " + Homestead.database.getSelectedProvider());
 			e.printStackTrace();
 		}
 	}
@@ -116,7 +126,7 @@ public class MySQL {
 
 		try (Statement stmt = connection.createStatement();
 				ResultSet rs = stmt.executeQuery(sql)) {
-			Homestead.cache.clear();
+			Homestead.regionsCache.clear();
 
 			while (rs.next()) {
 				UUID id = UUID.fromString(rs.getString("id"));
@@ -204,14 +214,46 @@ public class MySQL {
 				region.welcomeSign = welcomeSign;
 				region.icon = icon;
 
-				Homestead.cache.putOrUpdate(region);
+				Homestead.regionsCache.putOrUpdate(region);
 			}
 		} catch (SQLException e) {
-			Logger.error("Unable to execute a statement for MySQL.");
+			Logger.error("An unexpected error occurred for the provider: " + Homestead.database.getSelectedProvider());
 			e.printStackTrace();
 		}
 
-		Logger.info("Imported " + Homestead.cache.size() + " regions from MySQL.");
+		Logger.info("Imported " + Homestead.regionsCache.size() + " regions.");
+	}
+
+	public void importWars() {
+		String sql = "SELECT * FROM wars";
+
+		try (Statement stmt = connection.createStatement();
+			 ResultSet rs = stmt.executeQuery(sql)) {
+			Homestead.warsCache.clear();
+
+			while (rs.next()) {
+				UUID id = UUID.fromString(rs.getString("id"));
+				String displayName = rs.getString("displayName");
+				String name = rs.getString("name");
+				String description = rs.getString("description");
+				List<UUID> regions = rs.getString("regions").length() > 0
+						? Arrays.asList(rs.getString("regions").split("§")).stream()
+						.map(UUID::fromString).collect(Collectors.toList())
+						: new ArrayList<>();
+
+				War war = new War(name, regions);
+				war.id = id;
+				war.displayName = displayName;
+				war.description = description;
+
+				Homestead.warsCache.putOrUpdate(war);
+			}
+		} catch (SQLException e) {
+			Logger.error("An unexpected error occurred for the provider: " + Homestead.database.getSelectedProvider());
+			e.printStackTrace();
+		}
+
+		Logger.info("Imported " + Homestead.warsCache.size() + " wars.");
 	}
 
 	public void exportRegions() {
@@ -224,7 +266,7 @@ public class MySQL {
 				dbRegionIds.add(UUID.fromString(rs.getString("id")));
 			}
 		} catch (SQLException e) {
-			Logger.error("Unable to execute a statement for MySQL.");
+			Logger.error("An unexpected error occurred for the provider: " + Homestead.database.getSelectedProvider());
 			e.printStackTrace();
 
 			return;
@@ -268,7 +310,7 @@ public class MySQL {
 				PreparedStatement deleteStmt = connection.prepareStatement(deleteSql)) {
 			Set<UUID> cacheRegionIds = new HashSet<>();
 
-			for (Region region : Homestead.cache.getAll()) {
+			for (Region region : Homestead.regionsCache.getAll()) {
 				UUID regionId = region.id;
 				cacheRegionIds.add(regionId);
 
@@ -331,10 +373,77 @@ public class MySQL {
 
 			if (Homestead.config.isDebugEnabled()) {
 				Logger.info("Exported " + cacheRegionIds.size() + " regions and deleted " + dbRegionIds.size()
-					+ " regions from MySQL.");
+					+ " regions.");
 			}
 		} catch (SQLException e) {
-			Logger.error("Unable to execute a statement for MySQL.");
+			Logger.error("An unexpected error occurred for the provider: " + Homestead.database.getSelectedProvider());
+			e.printStackTrace();
+		}
+	}
+
+	public void exportWars() {
+		Set<UUID> dbWarIds = new HashSet<>();
+		String selectSql = "SELECT id FROM wars";
+
+		try (Statement stmt = connection.createStatement();
+			 ResultSet rs = stmt.executeQuery(selectSql)) {
+			while (rs.next()) {
+				dbWarIds.add(UUID.fromString(rs.getString("id")));
+			}
+		} catch (SQLException e) {
+			Logger.error("An unexpected error occurred for the provider: " + Homestead.database.getSelectedProvider());
+			e.printStackTrace();
+
+			return;
+		}
+
+		String upsertSql = "INSERT INTO wars (" +
+				"id, displayName, name, description, regions" +
+				") VALUES (?, ?, ?, ?, ?) " +
+				"ON DUPLICATE KEY UPDATE " +
+				"displayName = VALUES(displayName), " +
+				"name = VALUES(name), " +
+				"description = VALUES(description), " +
+				"regions = VALUES(regions)";
+
+		String deleteSql = "DELETE FROM wars WHERE id = ?";
+
+		try (PreparedStatement upsertStmt = connection.prepareStatement(upsertSql);
+			 PreparedStatement deleteStmt = connection.prepareStatement(deleteSql)) {
+			Set<UUID> cacheWarIds = new HashSet<>();
+
+			for (War war : Homestead.warsCache.getAll()) {
+				UUID warId = war.id;
+				cacheWarIds.add(warId);
+
+				String regionsStr = String.join("§",
+						war.regions.stream().map(UUID::toString).collect(Collectors.toList()));
+
+				upsertStmt.setString(1, warId.toString());
+				upsertStmt.setString(2, war.displayName);
+				upsertStmt.setString(3, war.name);
+				upsertStmt.setString(4, war.description);
+				upsertStmt.setString(5, regionsStr);
+
+				upsertStmt.addBatch();
+			}
+
+			upsertStmt.executeBatch();
+
+			dbWarIds.removeAll(cacheWarIds);
+			for (UUID deletedId : dbWarIds) {
+				deleteStmt.setString(1, deletedId.toString());
+				deleteStmt.addBatch();
+			}
+
+			deleteStmt.executeBatch();
+
+			if (Homestead.config.isDebugEnabled()) {
+				Logger.info("Exported " + cacheWarIds.size() + " wars and deleted " + dbWarIds.size()
+						+ " wars.");
+			}
+		} catch (SQLException e) {
+			Logger.error("An unexpected error occurred for the provider: " + Homestead.database.getSelectedProvider());
 			e.printStackTrace();
 		}
 	}
@@ -346,7 +455,7 @@ public class MySQL {
 				Logger.warning("Connection for MySQL has been closed.");
 			}
 		} catch (SQLException e) {
-			Logger.error("Unable to close connection for MySQL.");
+			Logger.error("An unexpected error occurred for the provider: " + Homestead.database.getSelectedProvider());
 			e.printStackTrace();
 		}
 	}

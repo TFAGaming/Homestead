@@ -42,7 +42,7 @@ public class MigrateDataSubCmd extends SubCommandBuilder {
             instance.exportRegions();
 
             Map<String, String> replacements = new HashMap<>();
-            replacements.put("{regions}", String.valueOf(Homestead.cache.getAll().size()));
+            replacements.put("{regions}", String.valueOf(Homestead.regionsCache.getAll().size()));
             replacements.put("{current-provider}", currentProvider);
             replacements.put("{selected-provider}", provider);
 

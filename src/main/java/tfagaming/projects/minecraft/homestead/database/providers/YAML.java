@@ -14,16 +14,23 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import tfagaming.projects.minecraft.homestead.Homestead;
 import tfagaming.projects.minecraft.homestead.logs.Logger;
 import tfagaming.projects.minecraft.homestead.structure.Region;
+import tfagaming.projects.minecraft.homestead.structure.War;
 import tfagaming.projects.minecraft.homestead.structure.serializable.*;
 import tfagaming.projects.minecraft.homestead.tools.java.ListUtils;
 
 public class YAML {
     private File regionsFolder;
+    private File warsFolder;
 
     public YAML(File dataFolder) {
         this.regionsFolder = new File(dataFolder, "regions");
         if (!regionsFolder.exists()) {
             regionsFolder.mkdirs();
+        }
+
+        this.warsFolder = new File(dataFolder, "wars");
+        if (!warsFolder.exists()) {
+            warsFolder.mkdirs();
         }
 
         Logger.info("New database connection established, path: " + regionsFolder.getPath());
@@ -38,7 +45,7 @@ public class YAML {
             return;
         }
 
-        Homestead.cache.clear();
+        Homestead.regionsCache.clear();
         int importedCount = 0;
 
         for (File file : regionFiles) {
@@ -127,7 +134,7 @@ public class YAML {
                 region.welcomeSign = welcomeSign;
                 region.icon = icon;
 
-                Homestead.cache.putOrUpdate(region);
+                Homestead.regionsCache.putOrUpdate(region);
                 importedCount++;
             } catch (Exception e) {
                 Logger.error("Error loading region from file: " + file.getName());
@@ -135,7 +142,47 @@ public class YAML {
             }
         }
 
-        Logger.info("Imported " + importedCount + " regions from YAML files.");
+        Logger.info("Imported " + importedCount + " regions.");
+    }
+
+    public void importWars() {
+        File[] warFiles = warsFolder
+                .listFiles((dir, name) -> name.startsWith("war_") && name.endsWith(".yml"));
+
+        if (warFiles == null || warFiles.length == 0) {
+            Logger.info("No war files found to import.");
+            return;
+        }
+
+        Homestead.warsCache.clear();
+        int importedCount = 0;
+
+        for (File file : warFiles) {
+            try {
+                YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
+
+                UUID id = UUID.fromString(config.getString("id"));
+                String displayName = config.getString("displayName");
+                String name = config.getString("name");
+                String description = config.getString("description");
+                List<UUID> regions = config.getStringList("regions").stream()
+                        .map(UUID::fromString)
+                        .collect(Collectors.toList());
+
+                War war = new War(name, regions);
+                war.id = id;
+                war.displayName = displayName;
+                war.description = description;
+
+                Homestead.warsCache.putOrUpdate(war);
+                importedCount++;
+            } catch (Exception e) {
+                Logger.error("Error loading war from file: " + file.getName());
+                e.printStackTrace();
+            }
+        }
+
+        Logger.info("Imported " + importedCount + " wars.");
     }
 
     public void exportRegions() {
@@ -156,7 +203,7 @@ public class YAML {
         }
 
         Set<UUID> cacheRegionIds = new HashSet<>();
-        for (Region region : Homestead.cache.getAll()) {
+        for (Region region : Homestead.regionsCache.getAll()) {
             try {
                 UUID regionId = region.id;
                 cacheRegionIds.add(regionId);
@@ -234,7 +281,66 @@ public class YAML {
 
         if (Homestead.config.isDebugEnabled()) {
             Logger.info(
-                    "Exported " + savedCount + " regions and deleted " + deletedCount + " regions from YAML files.");
+                    "Exported " + savedCount + " regions and deleted " + deletedCount + " regions.");
+        }
+    }
+
+    public void exportWars() {
+        int savedCount = 0;
+        int deletedCount = 0;
+
+        Set<UUID> existingFiles = new HashSet<>();
+        File[] warFiles = warsFolder
+                .listFiles((dir, name) -> name.startsWith("war_") && name.endsWith(".yml"));
+        if (warFiles != null) {
+            for (File file : warFiles) {
+                try {
+                    String uuidStr = file.getName().replace("war_", "").replace(".yml", "");
+                    existingFiles.add(UUID.fromString(uuidStr));
+                } catch (IllegalArgumentException e) {
+                }
+            }
+        }
+
+        Set<UUID> cacheWarIds = new HashSet<>();
+        for (War war : Homestead.warsCache.getAll()) {
+            try {
+                UUID warId = war.id;
+                cacheWarIds.add(warId);
+
+                File warFile = new File(warsFolder, "war_" + warId.toString() + ".yml");
+                YamlConfiguration config = new YamlConfiguration();
+
+                // Set all war properties
+                config.set("id", warId.toString());
+                config.set("displayName", war.displayName);
+                config.set("name", war.name);
+                config.set("description", war.description);
+                config.set("regions", war.regions.stream()
+                        .map(UUID::toString)
+                        .collect(Collectors.toList()));
+
+                config.save(warFile);
+                savedCount++;
+            } catch (IOException e) {
+                Logger.error("Error saving war: " + war.id);
+                e.printStackTrace();
+            }
+        }
+
+        existingFiles.removeAll(cacheWarIds);
+        for (UUID deletedId : existingFiles) {
+            File toDelete = new File(warsFolder, "war_" + deletedId.toString() + ".yml");
+            if (toDelete.delete()) {
+                deletedCount++;
+            } else {
+                Logger.warning("Failed to delete war file: " + toDelete.getName());
+            }
+        }
+
+        if (Homestead.config.isDebugEnabled()) {
+            Logger.info(
+                    "Exported " + savedCount + " wars and deleted " + deletedCount + " wars.");
         }
     }
 

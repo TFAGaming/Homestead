@@ -31,7 +31,7 @@ public class MariaDB {
 
             Logger.info("MariaDB database connection established.");
 
-            createTableIfNotExists();
+            createTablesIfNotExists();
         } catch (ClassNotFoundException e) {
             Logger.error("MariaDB JDBC Driver not found.");
             e.printStackTrace();
@@ -45,7 +45,7 @@ public class MariaDB {
         }
     }
 
-    public void createTableIfNotExists() {
+    public void createTablesIfNotExists() {
         String sql = """
             CREATE TABLE IF NOT EXISTS regions (
                 id              CHAR(36) PRIMARY KEY,
@@ -89,7 +89,7 @@ public class MariaDB {
         try (Statement stmt = connection.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
 
-            Homestead.cache.clear();
+            Homestead.regionsCache.clear();
 
             while (rs.next()) {
                 UUID id = UUID.fromString(rs.getString("id"));
@@ -183,13 +183,13 @@ public class MariaDB {
                 region.welcomeSign = welcomeSign;
                 region.icon = icon;
 
-                Homestead.cache.putOrUpdate(region);
+                Homestead.regionsCache.putOrUpdate(region);
             }
         } catch (SQLException e) {
             Logger.error("Unable to import regions from MariaDB.");
             e.printStackTrace();
         }
-        Logger.info("Imported " + Homestead.cache.size() + " regions from MariaDB.");
+        Logger.info("Imported " + Homestead.regionsCache.size() + " regions from MariaDB.");
     }
 
     public void exportRegions() {
@@ -247,7 +247,7 @@ public class MariaDB {
 
             Set<UUID> cacheRegionIds = new HashSet<>();
 
-            for (Region region : Homestead.cache.getAll()) {
+            for (Region region : Homestead.regionsCache.getAll()) {
                 UUID regionId = region.id;
                 cacheRegionIds.add(regionId);
 

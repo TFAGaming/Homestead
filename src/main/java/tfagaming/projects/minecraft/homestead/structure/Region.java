@@ -746,6 +746,6 @@ public class Region {
 
     // Other
     public void updateCache() {
-        Homestead.cache.putOrUpdate(this);
+        Homestead.regionsCache.putOrUpdate(this);
     }
 }

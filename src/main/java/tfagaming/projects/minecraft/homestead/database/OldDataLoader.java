@@ -121,14 +121,14 @@ public class OldDataLoader {
                     Logger.warning("Loaded region (ID: " + region.getUniqueId().toString() + "), name = "
                             + region.getName() + ", owner = " + region.getOwner().getName());
 
-                    Homestead.cache.putOrUpdate(region);
+                    Homestead.regionsCache.putOrUpdate(region);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
 
-        return Homestead.cache.size();
+        return Homestead.regionsCache.size();
     }
 
     public static boolean deleteDirectory(File file) {

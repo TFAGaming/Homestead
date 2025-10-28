@@ -26,7 +26,7 @@ public class PluginSubCmd extends SubCommandBuilder {
             replacements.put("{regions}", String.valueOf(RegionsManager.getAll().size()));
             replacements.put("{provider}", Homestead.database.getSelectedProvider());
             replacements.put("{avg-response-db}", String.valueOf(Homestead.database.getLatency()));
-            replacements.put("{avg-response-cache}", String.valueOf(Homestead.cache.getLatency()));
+            replacements.put("{avg-response-cache}", String.valueOf(Homestead.regionsCache.getLatency()));
 
             PlayerUtils.sendMessage(sender, 89, replacements);
         } else {
@@ -42,7 +42,7 @@ public class PluginSubCmd extends SubCommandBuilder {
                     { "Regions", RegionsManager.getAll().size() },
                     { "Database", Homestead.database.getSelectedProvider() },
                     { "Latency", Homestead.database.getLatency() },
-                    { "Latency (cache)", Homestead.cache.getLatency() }
+                    { "Latency (cache)", Homestead.regionsCache.getLatency() }
             };
 
             ListUtils.printTable(headers, data);

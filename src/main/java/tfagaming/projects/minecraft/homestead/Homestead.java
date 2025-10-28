@@ -37,7 +37,8 @@ public class Homestead extends JavaPlugin {
 	private static long startedAt;
 
 	public static Database database;
-	public static RegionsCache cache;
+	public static RegionsCache regionsCache;
+	public static WarsCache warsCache;
 
 	public static ConfigLoader config;
 	public static LanguageLoader language;
@@ -56,6 +57,11 @@ public class Homestead extends JavaPlugin {
 		File regionsFolder = new File(getDataFolder(), "regions");
 		if (!regionsFolder.exists()) {
 			regionsFolder.mkdir();
+		}
+
+		File warsFolder = new File(getDataFolder(), "wars");
+		if (!warsFolder.exists()) {
+			warsFolder.mkdir();
 		}
 
 		new Logger();
@@ -112,7 +118,8 @@ public class Homestead extends JavaPlugin {
 			}
 		}
 
-		Homestead.cache = new RegionsCache(config.get("cache-interval"));
+		Homestead.regionsCache = new RegionsCache(config.get("cache-interval"));
+		Homestead.warsCache = new WarsCache(config.get("cache-interval"));
 
 		Database.Provider provider = Database.parseProviderFromString(config.get("database.provider"));
 
@@ -124,7 +131,7 @@ public class Homestead extends JavaPlugin {
 		Homestead.database = new Database(provider);
 
 		File claimsFolder = new File(getDataFolder(), "claims");
-		if (claimsFolder.exists()) {
+		if (claimsFolder.exists() && claimsFolder.isDirectory()) {
 			Logger.warning("Detected \"claims\" folder, importing old regions data...");
 
 			int __a = OldDataLoader.loadRegions();
@@ -146,6 +153,7 @@ public class Homestead extends JavaPlugin {
 			}
 		} else {
 			database.importRegions();
+			database.importWars();
 		}
 
 		if (!IntegrationsUtils.isVaultInstalled()) {

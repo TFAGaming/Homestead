@@ -1,11 +1,7 @@
 package tfagaming.projects.minecraft.homestead.database.providers;
 
 import java.sql.*;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import org.bukkit.OfflinePlayer;
@@ -13,6 +9,7 @@ import org.bukkit.OfflinePlayer;
 import tfagaming.projects.minecraft.homestead.Homestead;
 import tfagaming.projects.minecraft.homestead.logs.Logger;
 import tfagaming.projects.minecraft.homestead.structure.Region;
+import tfagaming.projects.minecraft.homestead.structure.War;
 import tfagaming.projects.minecraft.homestead.structure.serializable.*;
 import tfagaming.projects.minecraft.homestead.tools.java.ListUtils;
 
@@ -29,7 +26,7 @@ public class PostgreSQL {
 
             Logger.info("PostgreSQL database connection established.");
 
-            createTableIfNotExists();
+            createTablesIfNotExists();
         } catch (ClassNotFoundException e) {
             Logger.error("PostgreSQL JDBC Driver not found.");
             e.printStackTrace();
@@ -52,7 +49,7 @@ public class PostgreSQL {
 
             Logger.info("PostgreSQL database connection established.");
 
-            createTableIfNotExists();
+            createTablesIfNotExists();
         } catch (ClassNotFoundException e) {
             Logger.error("PostgreSQL JDBC Driver not found.");
             e.printStackTrace();
@@ -70,8 +67,8 @@ public class PostgreSQL {
         }
     }
 
-    public void createTableIfNotExists() {
-        String sql = "CREATE TABLE IF NOT EXISTS regions (" +
+    public void createTablesIfNotExists() {
+        String sql1 = "CREATE TABLE IF NOT EXISTS regions (" +
                 "id UUID PRIMARY KEY, " +
                 "display_name TEXT NOT NULL, " +
                 "name TEXT NOT NULL, " +
@@ -99,11 +96,19 @@ public class PostgreSQL {
                 "icon TEXT" +
                 ")";
 
+        String sql2 = "CREATE TABLE IF NOT EXISTS wars (" +
+                "id UUID PRIMARY KEY, " +
+                "displayName TEXT NOT NULL, " +
+                "name TEXT NOT NULL, " +
+                "description TEXT NOT NULL, " +
+                "regions TEXT[] NOT NULL" +
+                ")";
+
         try (Statement stmt = connection.createStatement()) {
-            stmt.executeUpdate(sql);
-            Logger.info("Regions table created/verified in PostgreSQL.");
+            stmt.executeUpdate(sql1);
+            stmt.executeUpdate(sql2);
         } catch (SQLException e) {
-            Logger.error("Unable to create regions table in PostgreSQL.");
+            Logger.error("An unexpected error occurred for the provider: " + Homestead.database.getSelectedProvider());
             e.printStackTrace();
         }
     }
@@ -113,7 +118,7 @@ public class PostgreSQL {
 
         try (Statement stmt = connection.createStatement();
                 ResultSet rs = stmt.executeQuery(sql)) {
-            Homestead.cache.clear();
+            Homestead.regionsCache.clear();
 
             while (rs.next()) {
                 UUID id = (UUID) rs.getObject("id");
@@ -199,14 +204,45 @@ public class PostgreSQL {
                 region.welcomeSign = welcomeSign;
                 region.icon = icon;
 
-                Homestead.cache.putOrUpdate(region);
+                Homestead.regionsCache.putOrUpdate(region);
             }
         } catch (SQLException e) {
-            Logger.error("Unable to import regions from PostgreSQL.");
+            Logger.error("An unexpected error occurred for the provider: " + Homestead.database.getSelectedProvider());
             e.printStackTrace();
         }
 
-        Logger.info("Imported " + Homestead.cache.size() + " regions from PostgreSQL.");
+        Logger.info("Imported " + Homestead.regionsCache.size() + " regions.");
+    }
+
+    public void importWars() {
+        String sql = "SELECT * FROM wars";
+
+        try (Statement stmt = connection.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            Homestead.warsCache.clear();
+
+            while (rs.next()) {
+                UUID id = UUID.fromString(rs.getString("id"));
+                String displayName = rs.getString("displayName");
+                String name = rs.getString("name");
+                String description = rs.getString("description");
+                List<UUID> regions = Arrays.stream((String[]) rs.getArray("regions").getArray())
+                        .map(UUID::fromString)
+                        .collect(Collectors.toList());
+
+                War war = new War(name, regions);
+                war.id = id;
+                war.displayName = displayName;
+                war.description = description;
+
+                Homestead.warsCache.putOrUpdate(war);
+            }
+        } catch (SQLException e) {
+            Logger.error("An unexpected error occurred for the provider: " + Homestead.database.getSelectedProvider());
+            e.printStackTrace();
+        }
+
+        Logger.info("Imported " + Homestead.warsCache.size() + " wars.");
     }
 
     public void exportRegions() {
@@ -219,7 +255,7 @@ public class PostgreSQL {
                 dbRegionIds.add((UUID) rs.getObject("id"));
             }
         } catch (SQLException e) {
-            Logger.error("Unable to fetch region IDs from PostgreSQL.");
+            Logger.error("An unexpected error occurred for the provider: " + Homestead.database.getSelectedProvider());
             e.printStackTrace();
             return;
         }
@@ -262,7 +298,7 @@ public class PostgreSQL {
                 PreparedStatement deleteStmt = connection.prepareStatement(deleteSql)) {
             Set<UUID> cacheRegionIds = new HashSet<>();
 
-            for (Region region : Homestead.cache.getAll()) {
+            for (Region region : Homestead.regionsCache.getAll()) {
                 UUID regionId = region.id;
                 cacheRegionIds.add(regionId);
 
@@ -336,10 +372,77 @@ public class PostgreSQL {
 
             if (Homestead.config.isDebugEnabled()) {
                 Logger.info("Exported " + cacheRegionIds.size() + " regions and deleted " + dbRegionIds.size() +
-                        " regions from PostgreSQL.");
+                        " regions.");
             }
         } catch (SQLException e) {
-            Logger.error("Unable to export regions to PostgreSQL.");
+            Logger.error("An unexpected error occurred for the provider: " + Homestead.database.getSelectedProvider());
+            e.printStackTrace();
+        }
+    }
+
+    public void exportWars() {
+        Set<UUID> dbWarIds = new HashSet<>();
+        String selectSql = "SELECT id FROM wars";
+
+        try (Statement stmt = connection.createStatement();
+             ResultSet rs = stmt.executeQuery(selectSql)) {
+            while (rs.next()) {
+                dbWarIds.add(UUID.fromString(rs.getString("id")));
+            }
+        } catch (SQLException e) {
+            Logger.error("An unexpected error occurred for the provider: " + Homestead.database.getSelectedProvider());
+            e.printStackTrace();
+
+            return;
+        }
+
+        String upsertSql = "INSERT INTO wars (" +
+                "id, displayName, name, description, regions" +
+                ") VALUES (?, ?, ?, ?, ?) " +
+                "ON CONFLICT (id) DO UPDATE SET " +
+                "displayName = EXCLUDED.displayName, " +
+                "name = EXCLUDED.name, " +
+                "description = EXCLUDED.description, " +
+                "regions = EXCLUDED.regions";
+
+        String deleteSql = "DELETE FROM wars WHERE id = ?";
+
+        try (PreparedStatement upsertStmt = connection.prepareStatement(upsertSql);
+             PreparedStatement deleteStmt = connection.prepareStatement(deleteSql)) {
+            Set<UUID> cacheWarIds = new HashSet<>();
+
+            for (War war : Homestead.warsCache.getAll()) {
+                UUID warId = war.id;
+                cacheWarIds.add(warId);
+
+                String regionsStr = String.join("§",
+                        war.regions.stream().map(UUID::toString).collect(Collectors.toList()));
+
+                upsertStmt.setString(1, warId.toString());
+                upsertStmt.setString(2, war.displayName);
+                upsertStmt.setString(3, war.name);
+                upsertStmt.setString(4, war.description);
+                upsertStmt.setString(5, regionsStr);
+
+                upsertStmt.addBatch();
+            }
+
+            upsertStmt.executeBatch();
+
+            dbWarIds.removeAll(cacheWarIds);
+            for (UUID deletedId : dbWarIds) {
+                deleteStmt.setString(1, deletedId.toString());
+                deleteStmt.addBatch();
+            }
+
+            deleteStmt.executeBatch();
+
+            if (Homestead.config.isDebugEnabled()) {
+                Logger.info("Exported " + cacheWarIds.size() + " wars and deleted " + dbWarIds.size()
+                        + " wars.");
+            }
+        } catch (SQLException e) {
+            Logger.error("An unexpected error occurred for the provider: " + Homestead.database.getSelectedProvider());
             e.printStackTrace();
         }
     }
@@ -351,7 +454,7 @@ public class PostgreSQL {
                 Logger.warning("PostgreSQL connection has been closed.");
             }
         } catch (SQLException e) {
-            Logger.error("Unable to close PostgreSQL connection.");
+            Logger.error("An unexpected error occurred for the provider: " + Homestead.database.getSelectedProvider());
             e.printStackTrace();
         }
     }
