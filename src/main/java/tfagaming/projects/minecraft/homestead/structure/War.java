@@ -1,6 +1,7 @@
 package tfagaming.projects.minecraft.homestead.structure;
 
 import tfagaming.projects.minecraft.homestead.Homestead;
+import tfagaming.projects.minecraft.homestead.managers.RegionsManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,15 +13,21 @@ public class War {
     public String description;
     public String displayName;
     public ArrayList<UUID> regions = new ArrayList<>();
+    public double prize;
+    public long startedAt;
 
     public War(String name) {
         this.id = UUID.randomUUID();
         this.name = name;
+        this.prize = 0.0;
+        this.startedAt = System.currentTimeMillis();
     }
 
     public War(String name, List<UUID> regions) {
         this.id = UUID.randomUUID();
         this.name = name;
+        this.prize = 0.0;
+        this.startedAt = System.currentTimeMillis();
 
         this.regions.addAll(regions);
     }
@@ -58,7 +65,40 @@ public class War {
         updateCache();
     }
 
+    // Prize
+    public double getPrize() {
+        return prize;
+    }
+
+    public void setPrize(double prize) {
+        this.prize = prize;
+        updateCache();
+    }
+
+    // Started At
+    public long getStartedAt() {
+        return startedAt;
+    }
+
     // Regions
+    public ArrayList<UUID> getRegionUniqueIds() {
+        return regions;
+    }
+
+    public ArrayList<Region> getRegions() {
+        ArrayList<Region> regions = new ArrayList<>();
+
+        for (UUID uuid : this.regions) {
+            Region region = RegionsManager.findRegion(uuid);
+
+            if (region != null) {
+                regions.add(region);
+            }
+        }
+
+        return regions;
+    }
+
     public void addRegion(Region region) {
         if (this.regions.contains(region.id)) {
             return;

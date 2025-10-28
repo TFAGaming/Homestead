@@ -40,9 +40,11 @@ public class MigrateDataSubCmd extends SubCommandBuilder {
             Database instance = new Database(Database.parseProviderFromString(provider), true);
 
             instance.exportRegions();
+            instance.exportWars();
 
             Map<String, String> replacements = new HashMap<>();
             replacements.put("{regions}", String.valueOf(Homestead.regionsCache.getAll().size()));
+            replacements.put("{wars}", String.valueOf(Homestead.warsCache.getAll().size()));
             replacements.put("{current-provider}", currentProvider);
             replacements.put("{selected-provider}", provider);
 

@@ -101,7 +101,9 @@ public class PostgreSQL {
                 "displayName TEXT NOT NULL, " +
                 "name TEXT NOT NULL, " +
                 "description TEXT NOT NULL, " +
-                "regions TEXT[] NOT NULL" +
+                "regions TEXT[] NOT NULL, " +
+                "prize DOUBLE NOT NULL, " +
+                "started_at BIGINT NOT NULL" +
                 ")";
 
         try (Statement stmt = connection.createStatement()) {
@@ -229,11 +231,15 @@ public class PostgreSQL {
                 List<UUID> regions = Arrays.stream((String[]) rs.getArray("regions").getArray())
                         .map(UUID::fromString)
                         .collect(Collectors.toList());
+                double prize = rs.getDouble("prize");
+                long startedAt = rs.getLong("started_at");
 
                 War war = new War(name, regions);
                 war.id = id;
                 war.displayName = displayName;
                 war.description = description;
+                war.prize = prize;
+                war.startedAt = startedAt;
 
                 Homestead.warsCache.putOrUpdate(war);
             }
@@ -397,13 +403,15 @@ public class PostgreSQL {
         }
 
         String upsertSql = "INSERT INTO wars (" +
-                "id, displayName, name, description, regions" +
-                ") VALUES (?, ?, ?, ?, ?) " +
+                "id, displayName, name, description, regions, prize, started_at" +
+                ") VALUES (?, ?, ?, ?, ?, ?, ?) " +
                 "ON CONFLICT (id) DO UPDATE SET " +
                 "displayName = EXCLUDED.displayName, " +
                 "name = EXCLUDED.name, " +
                 "description = EXCLUDED.description, " +
-                "regions = EXCLUDED.regions";
+                "regions = EXCLUDED.regions, " +
+                "prize = EXCLUDED.prize, " +
+                "started_at = EXCLUDED.started_at";
 
         String deleteSql = "DELETE FROM wars WHERE id = ?";
 
@@ -423,6 +431,8 @@ public class PostgreSQL {
                 upsertStmt.setString(3, war.name);
                 upsertStmt.setString(4, war.description);
                 upsertStmt.setString(5, regionsStr);
+                upsertStmt.setDouble(6, war.prize);
+                upsertStmt.setLong(7, war.startedAt);
 
                 upsertStmt.addBatch();
             }

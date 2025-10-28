@@ -168,11 +168,15 @@ public class YAML {
                 List<UUID> regions = config.getStringList("regions").stream()
                         .map(UUID::fromString)
                         .collect(Collectors.toList());
+                double prize = config.getDouble("prize");
+                long startedAt = config.getLong("startedAt");
 
                 War war = new War(name, regions);
                 war.id = id;
                 war.displayName = displayName;
                 war.description = description;
+                war.prize = prize;
+                war.startedAt = startedAt;
 
                 Homestead.warsCache.putOrUpdate(war);
                 importedCount++;
@@ -319,6 +323,8 @@ public class YAML {
                 config.set("regions", war.regions.stream()
                         .map(UUID::toString)
                         .collect(Collectors.toList()));
+                config.set("prize", war.prize);
+                config.set("startedAt", war.startedAt);
 
                 config.save(warFile);
                 savedCount++;

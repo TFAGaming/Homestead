@@ -109,7 +109,9 @@ public class MySQL {
 				"displayName TINYTEXT NOT NULL, " +
 				"name TINYTEXT NOT NULL, " +
 				"description MEDIUMTEXT NOT NULL, " +
-				"regions LONGTEXT NOT NULL" +
+				"regions LONGTEXT NOT NULL, " +
+				"prize DOUBLE NOT NULL, " +
+				"startedAt BIGINT NOT NULL" +
 				")";
 
 		try (Statement stmt = connection.createStatement()) {
@@ -240,11 +242,15 @@ public class MySQL {
 						? Arrays.asList(rs.getString("regions").split("§")).stream()
 						.map(UUID::fromString).collect(Collectors.toList())
 						: new ArrayList<>();
+				double prize = rs.getDouble("prize");
+				long startedAt = rs.getLong("startedAt");
 
 				War war = new War(name, regions);
 				war.id = id;
 				war.displayName = displayName;
 				war.description = description;
+				war.prize = prize;
+				war.startedAt = startedAt;
 
 				Homestead.warsCache.putOrUpdate(war);
 			}
@@ -398,13 +404,15 @@ public class MySQL {
 		}
 
 		String upsertSql = "INSERT INTO wars (" +
-				"id, displayName, name, description, regions" +
-				") VALUES (?, ?, ?, ?, ?) " +
+				"id, displayName, name, description, regions, prize, startedAt" +
+				") VALUES (?, ?, ?, ?, ?, ?, ?) " +
 				"ON DUPLICATE KEY UPDATE " +
 				"displayName = VALUES(displayName), " +
 				"name = VALUES(name), " +
 				"description = VALUES(description), " +
-				"regions = VALUES(regions)";
+				"regions = VALUES(regions), " +
+				"prize = VALUES(prize), " +
+				"startedAt = VALUES(startedAt)";
 
 		String deleteSql = "DELETE FROM wars WHERE id = ?";
 
@@ -424,6 +432,8 @@ public class MySQL {
 				upsertStmt.setString(3, war.name);
 				upsertStmt.setString(4, war.description);
 				upsertStmt.setString(5, regionsStr);
+				upsertStmt.setDouble(6, war.prize);
+				upsertStmt.setLong(7, war.startedAt);
 
 				upsertStmt.addBatch();
 			}

@@ -105,7 +105,9 @@ public class SQLite {
 				"displayName TEXT NOT NULL, " +
 				"name TEXT NOT NULL, " +
 				"description TEXT NOT NULL, " +
-				"regions TEXT NOT NULL" +
+				"regions TEXT NOT NULL, " +
+				"prize REAL NOT NULL, " +
+				"startedAt INTEGER NOT NULL" +
 				")";
 
 		try (Statement stmt = connection.createStatement()) {
@@ -242,11 +244,15 @@ public class SQLite {
 						? Arrays.asList(rs.getString("regions").split("§")).stream()
 						.map(UUID::fromString).collect(Collectors.toList())
 						: new ArrayList<>();
+				double prize = rs.getDouble("prize");
+				long startedAt = rs.getLong("startedAt");
 
 				War war = new War(name, regions);
 				war.id = id;
 				war.displayName = displayName;
 				war.description = description;
+				war.prize = prize;
+				war.startedAt = startedAt;
 
 				Homestead.warsCache.putOrUpdate(war);
 			}
@@ -380,8 +386,8 @@ public class SQLite {
 		}
 
 		String upsertSql = "INSERT OR REPLACE INTO  wars (" +
-				"id, displayName, name, description, regions" +
-				") VALUES (?, ?, ?, ?, ?)";
+				"id, displayName, name, description, regions, prize, startedAt" +
+				") VALUES (?, ?, ?, ?, ?, ?, ?)";
 
 		String deleteSql = "DELETE FROM wars WHERE id = ?";
 
@@ -401,6 +407,8 @@ public class SQLite {
 				upsertStmt.setString(3, war.name);
 				upsertStmt.setString(4, war.description);
 				upsertStmt.setString(5, regionsStr);
+				upsertStmt.setDouble(6, war.prize);
+				upsertStmt.setLong(7, war.startedAt);
 
 				upsertStmt.addBatch();
 			}

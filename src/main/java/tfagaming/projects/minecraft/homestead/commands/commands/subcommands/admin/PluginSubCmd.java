@@ -10,6 +10,7 @@ import org.bukkit.entity.Player;
 import tfagaming.projects.minecraft.homestead.Homestead;
 import tfagaming.projects.minecraft.homestead.commands.SubCommandBuilder;
 import tfagaming.projects.minecraft.homestead.managers.RegionsManager;
+import tfagaming.projects.minecraft.homestead.managers.WarsManager;
 import tfagaming.projects.minecraft.homestead.tools.java.ListUtils;
 import tfagaming.projects.minecraft.homestead.tools.minecraft.players.PlayerUtils;
 
@@ -24,6 +25,7 @@ public class PluginSubCmd extends SubCommandBuilder {
             Map<String, String> replacements = new HashMap<>();
             replacements.put("{plugin-version}", Homestead.getVersion());
             replacements.put("{regions}", String.valueOf(RegionsManager.getAll().size()));
+            replacements.put("{wars}", String.valueOf(WarsManager.getAll().size()));
             replacements.put("{provider}", Homestead.database.getSelectedProvider());
             replacements.put("{avg-response-db}", String.valueOf(Homestead.database.getLatency()));
             replacements.put("{avg-response-cache}", String.valueOf(Homestead.regionsCache.getLatency()));
