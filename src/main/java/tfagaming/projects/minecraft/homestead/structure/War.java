@@ -19,6 +19,8 @@ public class War {
     public War(String name) {
         this.id = UUID.randomUUID();
         this.name = name;
+        this.displayName = name;
+        this.description = "";
         this.prize = 0.0;
         this.startedAt = System.currentTimeMillis();
     }
@@ -26,6 +28,8 @@ public class War {
     public War(String name, List<UUID> regions) {
         this.id = UUID.randomUUID();
         this.name = name;
+        this.displayName = name;
+        this.description = "";
         this.prize = 0.0;
         this.startedAt = System.currentTimeMillis();
 

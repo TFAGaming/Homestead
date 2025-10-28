@@ -50,4 +50,38 @@ public class WarsManager {
 
         Homestead.warsCache.remove(war);
     }
+
+    public static void removeRegionFromAnyWar(UUID id) {
+        for (War war : Homestead.warsCache.getAll()) {
+            for (Region region : war.getRegions()) {
+                if (region.getUniqueId().equals(id)) {
+                    war.removeRegion(region);
+
+                    break;
+                }
+            }
+        }
+    }
+
+    public static boolean isNameUsed(String name) {
+        for (War war : Homestead.warsCache.getAll()) {
+            if (war.getName().equalsIgnoreCase(name)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public static boolean isRegionInWar(UUID id) {
+        for (War war : Homestead.warsCache.getAll()) {
+            for (Region region : war.getRegions()) {
+                if (region.getUniqueId().equals(id)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
 }
